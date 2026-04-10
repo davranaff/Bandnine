@@ -1,0 +1,48 @@
+# IELTS FastAPI Backend v1
+
+## Stack
+- FastAPI + Pydantic v2
+- SQLAlchemy Async + Alembic
+- PostgreSQL + Redis
+- ARQ background workers
+- JWT auth (access + refresh with revocation)
+
+## Quick Start
+Run commands from project root (`../` from this directory).
+
+1. Copy env:
+   ```bash
+   cp .env.example .env
+   ```
+2. Start containers:
+   ```bash
+   docker compose up --build
+   ```
+3. Apply migrations:
+   ```bash
+   docker compose exec api alembic upgrade head
+   ```
+4. Seed data:
+   ```bash
+   docker compose exec api python -m app.scripts.seed
+   ```
+
+## API
+- Base prefix: `/api/v1`
+- Swagger: `http://localhost:8000/docs`
+
+## Auth
+- Access token: 15 min
+- Refresh token: 30 days
+- Header: `Authorization: Bearer <access_token>`
+
+## Worker
+Run background parser worker:
+```bash
+arq app.workers.arq_worker.WorkerSettings
+```
+
+## Tests
+```bash
+make test
+```

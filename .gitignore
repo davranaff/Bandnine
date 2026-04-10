@@ -1,0 +1,43 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.test.example
+
+# OS
+.DS_Store
+
+# Global caches
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.tox/
+.nox/
+
+# Backend
+backend/.pytest_cache/
+backend/.ruff_cache/
+backend/.mypy_cache/
+backend/.pyre/
+backend/.tox/
+backend/.nox/
+backend/test.db
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/**/*.pyo
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/.cache/
+frontend/node_modules/.cache/
+frontend/.parcel-cache/
+frontend/.turbo/
+frontend/.vite/
+
+# IDE
+.vscode/
+.idea/

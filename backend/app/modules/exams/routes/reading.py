@@ -1,0 +1,39 @@
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.security import get_current_user
+from app.db.models import User
+from app.db.session import get_db
+from app.modules.exams import services
+from app.modules.exams.schemas import ExamAnswerIn, ExamCreateIn, ExamPublic, ExamSubmitOut
+
+router = APIRouter()
+
+
+@router.post("/reading", response_model=ExamPublic)
+async def create_reading_exam(
+    payload: ExamCreateIn,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> ExamPublic:
+    return ExamPublic.model_validate(await services.create_exam(db, current_user, "reading", payload.test_id))
+
+
+@router.post("/reading/{exam_id}/start", response_model=ExamPublic)
+async def start_reading_exam(
+    exam_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> ExamPublic:
+    return ExamPublic.model_validate(await services.start_exam(db, current_user, "reading", exam_id))
+
+
+@router.post("/reading/{exam_id}/submit", response_model=ExamSubmitOut)
+async def submit_reading_exam(
+    exam_id: int,
+    payload: list[ExamAnswerIn],
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> ExamSubmitOut:
+    result = await services.submit_reading_exam(db, current_user, exam_id, [p.model_dump() for p in payload])
+    return ExamSubmitOut.model_validate(result)

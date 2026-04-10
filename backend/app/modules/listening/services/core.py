@@ -1,0 +1,227 @@
+from __future__ import annotations
+
+import re
+from typing import Any
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.errors import ApiError
+from app.core.pagination import CursorPage, serialize_page
+from app.db.models import ListeningQuestion, ListeningQuestionBlock, ListeningTest
+from app.modules.listening import repository
+from app.modules.listening.schemas import ListeningTestListItem
+
+LISTENING_OPTION_BLOCK_TYPES = {
+    "matching",
+    "list_of_options",
+    "multiple_choice",
+    "note_completion",
+    "form_completion",
+    "table_completion",
+    "sentence_completion",
+    "summary_completion",
+    "short_answer",
+    "short_answer_multiple",
+    "map_plan_labelling",
+    "diagram_flowchart_completion",
+}
+
+LISTENING_DROPDOWN_BLOCK_TYPES = {
+    "matching",
+    "list_of_options",
+    "map_plan_labelling",
+}
+
+LISTENING_RADIO_BLOCK_TYPES = {"multiple_choice"}
+
+LISTENING_TABLE_BLOCK_TYPES = {"table_completion"}
+
+LISTENING_INLINE_TEXT_BLOCK_TYPES = {
+    "note_completion",
+    "form_completion",
+    "sentence_completion",
+    "summary_completion",
+    "short_answer",
+    "short_answer_multiple",
+    "diagram_flowchart_completion",
+}
+
+_WORD_HINTS = {
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+}
+
+_MAX_WORDS_RE = re.compile(r"no\s+more\s+than\s+(\w+)\s+words?", re.IGNORECASE)
+_WORD_ONLY_RE = re.compile(r"(\w+)\s+word(?:\s+only)?", re.IGNORECASE)
+
+
+def _extract_max_words(*texts: str | None) -> int | None:
+    for raw_text in texts:
+        if not raw_text:
+            continue
+        text = raw_text.strip()
+        if not text:
+            continue
+        for pattern in (_MAX_WORDS_RE, _WORD_ONLY_RE):
+            match = pattern.search(text)
+            if not match:
+                continue
+            token = match.group(1).lower()
+            if token.isdigit():
+                return int(token)
+            if token in _WORD_HINTS:
+                return _WORD_HINTS[token]
+    return None
+
+
+def _build_answer_spec(block: ListeningQuestionBlock) -> dict[str, Any]:
+    block_type = block.block_type
+    if block_type in LISTENING_DROPDOWN_BLOCK_TYPES:
+        return {
+            "answer_type": "single_choice",
+            "input_variant": "dropdown",
+            "options_mode": "per_question",
+            "max_words": None,
+        }
+    if block_type in LISTENING_RADIO_BLOCK_TYPES:
+        return {
+            "answer_type": "single_choice",
+            "input_variant": "radio",
+            "options_mode": "per_question",
+            "max_words": None,
+        }
+    if block_type in LISTENING_TABLE_BLOCK_TYPES:
+        return {
+            "answer_type": "text_input",
+            "input_variant": "table_blank",
+            "options_mode": None,
+            "max_words": _extract_max_words(block.description, block.table_completion),
+        }
+    if block_type in LISTENING_INLINE_TEXT_BLOCK_TYPES:
+        return {
+            "answer_type": "text_input",
+            "input_variant": "inline_blank",
+            "options_mode": None,
+            "max_words": _extract_max_words(block.description),
+        }
+    return {
+        "answer_type": "text_input",
+        "input_variant": "text",
+        "options_mode": None,
+        "max_words": _extract_max_words(block.description),
+    }
+
+
+def question_numbering(test: ListeningTest) -> dict[int, int]:
+    ordered_questions: list[ListeningQuestion] = [
+        question
+        for part in sorted(test.parts, key=lambda p: p.order)
+        for block in sorted(part.question_blocks, key=lambda b: b.order)
+        for question in sorted(block.questions, key=lambda q: q.order)
+    ]
+    return {question.id: idx + 1 for idx, question in enumerate(ordered_questions)}
+
+
+def _serialize_question(question: ListeningQuestion, number: int) -> dict[str, Any]:
+    spec = _build_answer_spec(question.question_block)
+    payload: dict[str, Any] = {
+        "id": question.id,
+        "question_text": question.question_text,
+        "order": question.order,
+        "number": number,
+        "answer_type": spec["answer_type"],
+        "input_variant": spec["input_variant"],
+        "options": [],
+    }
+    if question.question_block.block_type in LISTENING_OPTION_BLOCK_TYPES:
+        payload["options"] = [
+            {
+                "id": option.id,
+                "option_text": option.option_text,
+                "is_correct": option.is_correct,
+                "order": option.order,
+            }
+            for option in sorted(question.options, key=lambda x: x.order)
+        ]
+    return payload
+
+
+def _serialize_block(block: ListeningQuestionBlock, numbering: dict[int, int]) -> dict[str, Any]:
+    answer_spec = _build_answer_spec(block)
+    payload: dict[str, Any] = {
+        "id": block.id,
+        "title": block.title,
+        "description": block.description,
+        "block_type": block.block_type,
+        "order": block.order,
+        "answer_spec": answer_spec,
+        "questions": [
+            _serialize_question(question, numbering.get(question.id, 0))
+            for question in sorted(block.questions, key=lambda x: x.order)
+        ],
+    }
+    if block.block_type == "table_completion":
+        payload["table_json"] = block.table_json
+    return payload
+
+
+def serialize_listening_test_detail(test: ListeningTest) -> dict[str, Any]:
+    numbering = question_numbering(test)
+    parts = [
+        {
+            "id": part.id,
+            "title": part.title,
+            "order": part.order,
+            "part_number": part.order,
+            "question_blocks": [
+                _serialize_block(block, numbering)
+                for block in sorted(part.question_blocks, key=lambda x: x.order)
+            ],
+            "questions_count": sum(len(block.questions) for block in part.question_blocks),
+        }
+        for part in sorted(test.parts, key=lambda x: x.order)
+    ]
+    return {
+        "id": test.id,
+        "title": test.title,
+        "voice_url": test.voice_url,
+        # One shared audio for the whole listening test (all parts).
+        "audio_url": test.voice_url,
+        "description": test.description,
+        "time_limit": test.time_limit,
+        "created_at": test.created_at,
+        "parts": parts,
+    }
+
+
+async def list_listening_tests(db: AsyncSession, cursor: str | None, limit: int) -> CursorPage:
+    rows, next_cursor = await repository.list_active_tests(db, cursor=cursor, limit=limit)
+    return serialize_page(
+        rows,
+        serializer=lambda row: ListeningTestListItem(
+            id=row.id,
+            title=row.title,
+            voice_url=row.voice_url,
+            description=row.description,
+            time_limit=row.time_limit,
+            is_active=row.is_active,
+            created_at=row.created_at,
+        ).model_dump(),
+        next_cursor=next_cursor,
+        limit=limit,
+    )
+
+
+async def get_listening_test_detail(db: AsyncSession, test_id: int) -> dict[str, Any]:
+    test = await repository.get_test_detail(db, test_id)
+    if test is None:
+        raise ApiError(code="listening_test_not_found", message="Listening test not found", status_code=404)
+    return serialize_listening_test_detail(test)
