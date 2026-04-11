@@ -1,4 +1,4 @@
-# IELTS FastAPI Backend v1
+# Bandnine Backend v1
 
 ## Stack
 - FastAPI + Pydantic v2
@@ -40,9 +40,9 @@ Included fixture files:
 - `writing_tests.yaml`
 
 Default demo users (exactly 3):
-- `admin.demo@ielts.uz` / `AdminDemo123` (admin)
-- `teacher.demo@ielts.uz` / `TeacherDemo123` (teacher)
-- `student.demo@ielts.uz` / `StudentDemo123` (student)
+- `admin.demo@bandnine.uz` / `AdminDemo123` (admin)
+- `teacher.demo@bandnine.uz` / `TeacherDemo123` (teacher)
+- `student.demo@bandnine.uz` / `StudentDemo123` (student)
 
 ## API
 - Base prefix: `/api/v1`

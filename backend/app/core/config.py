@@ -11,7 +11,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "IELTS FastAPI API"
+    app_name: str = "Bandnine API"
     environment: str = "development"
     debug: bool = False
     api_prefix: str = "/api/v1"
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     confirm_token_expire_hours: int = 24
     reset_token_expire_hours: int = 1
 
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ielts"
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/bandnine"
     redis_url: str = "redis://localhost:6379/0"
 
     smtp_host: str | None = None

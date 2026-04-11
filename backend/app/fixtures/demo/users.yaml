@@ -1,17 +1,17 @@
 users:
-  - email: admin.demo@ielts.uz
+  - email: admin.demo@bandnine.uz
     password: AdminDemo123
     first_name: Jasur
     last_name: Qodirov
     role: admin
 
-  - email: teacher.demo@ielts.uz
+  - email: teacher.demo@bandnine.uz
     password: TeacherDemo123
     first_name: Dilnoza
     last_name: Rahimova
     role: teacher
 
-  - email: student.demo@ielts.uz
+  - email: student.demo@bandnine.uz
     password: StudentDemo123
     first_name: Azizbek
     last_name: Tursunov

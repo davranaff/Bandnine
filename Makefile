@@ -3,43 +3,48 @@
 APP_DIR=backend
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
+COMPOSE ?= docker compose
+API_SERVICE ?= api
+WORKER_SERVICE ?= worker
 
 install:
-	$(PIP) install -r $(APP_DIR)/requirements.txt
+	$(COMPOSE) build
 
 lint:
-	cd $(APP_DIR) && ruff check .
+	$(COMPOSE) run --rm $(API_SERVICE) ruff check .
 
 test:
-	cd $(APP_DIR) && TEST_DATABASE_URL=sqlite+aiosqlite:///./test.db pytest -q
+	$(COMPOSE) run --rm -e TEST_DATABASE_URL=sqlite+aiosqlite:///./test.db $(API_SERVICE) pytest -q
 
 migrate:
 	cd $(APP_DIR) && alembic revision --autogenerate -m "auto"
 
 upgrade:
-	cd $(APP_DIR) && alembic upgrade head
+	$(COMPOSE) exec -T $(API_SERVICE) alembic upgrade head
 
 seed:
-	docker compose up -d postgres redis api
-	docker compose exec -T api python -m app.scripts.seed
+	$(COMPOSE) up -d postgres redis $(API_SERVICE)
+	$(COMPOSE) exec -T $(API_SERVICE) python -m app.scripts.seed
 
 seed-local:
-	cd $(APP_DIR) && $(PYTHON) -m app.scripts.seed
+	$(COMPOSE) up -d postgres redis $(API_SERVICE)
+	$(COMPOSE) exec -T $(API_SERVICE) python -m app.scripts.seed
 
 run:
-	cd $(APP_DIR) && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	$(COMPOSE) up $(API_SERVICE)
 
 worker:
-	cd $(APP_DIR) && arq app.workers.arq_worker.WorkerSettings
+	$(COMPOSE) up $(WORKER_SERVICE)
 
 up:
-	docker compose up --build -d
+	$(COMPOSE) up --build -d
 
 down:
-	docker compose down
+	$(COMPOSE) down
 
 logs:
-	docker compose logs -f api frontend worker
+	$(COMPOSE) logs -f api frontend worker
 
 restart:
-	docker compose down && docker compose up --build
+	$(COMPOSE) down
+	$(COMPOSE) up --build -d

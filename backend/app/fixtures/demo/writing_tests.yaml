@@ -1,48 +1,97 @@
 tests:
   - title: Writing Demo Test 1
-    description: Writing tasks on urban infrastructure and education.
+    description: Writing tasks on urban mobility and education.
     time_limit: 3600
     is_active: true
     parts:
       - order: 1
-        task: Compare the data in the diagram and describe the main trends.
+        task: Summarize the transport usage chart and highlight key trends across age groups.
         image_url: https://cdn.demo.ielts.uz/writing/task1-chart-1.png
         file_urls:
           - https://cdn.demo.ielts.uz/writing/task1-prompt-1.pdf
       - order: 2
-        task: Discuss the advantages and disadvantages of living in a large city.
+        task: Some people think large cities improve quality of life, while others disagree. Discuss both views and give your opinion.
         image_url: null
         file_urls:
           - https://cdn.demo.ielts.uz/writing/task2-brief-1.pdf
 
   - title: Writing Demo Test 2
-    description: Writing tasks on technology and the environment.
+    description: Writing tasks on technology and environmental policy.
     time_limit: 3600
     is_active: true
     parts:
       - order: 1
-        task: Describe the changes in energy consumption shown in the table.
+        task: Describe the energy consumption table and compare changes between 2010 and 2025.
         image_url: https://cdn.demo.ielts.uz/writing/task1-table-2.png
         file_urls:
           - https://cdn.demo.ielts.uz/writing/task1-prompt-2.pdf
       - order: 2
-        task: Can online education completely replace traditional education? Support your opinion.
+        task: Can online education replace traditional education? Discuss advantages and disadvantages and give your view.
         image_url: null
         file_urls:
           - https://cdn.demo.ielts.uz/writing/task2-brief-2.pdf
 
   - title: Writing Demo Test 3
-    description: Writing tasks on the labor market and health.
+    description: Writing tasks on labor markets and health systems.
     time_limit: 3600
     is_active: true
     parts:
       - order: 1
-        task: Analyze the employment figures in the graph and highlight the key differences.
+        task: Analyze the employment graph and summarize the key differences among sectors.
         image_url: https://cdn.demo.ielts.uz/writing/task1-graph-3.png
         file_urls:
           - https://cdn.demo.ielts.uz/writing/task1-prompt-3.pdf
       - order: 2
-        task: Give your view on company responsibility for maintaining work-life balance.
+        task: To what extent should companies be responsible for employees' work-life balance?
         image_url: null
         file_urls:
           - https://cdn.demo.ielts.uz/writing/task2-brief-3.pdf
+
+  - title: Writing Demo Test 4
+    description: Writing tasks on migration and public services.
+    time_limit: 3600
+    is_active: true
+    parts:
+      - order: 1
+        task: The map shows population movement between districts. Summarize the main changes.
+        image_url: https://cdn.demo.ielts.uz/writing/task1-map-4.png
+        file_urls:
+          - https://cdn.demo.ielts.uz/writing/task1-prompt-4.pdf
+          - https://cdn.demo.ielts.uz/writing/task1-data-4.csv
+      - order: 2
+        task: Some believe governments should spend more on public transport than roads. Discuss both views and give your opinion.
+        image_url: null
+        file_urls:
+          - https://cdn.demo.ielts.uz/writing/task2-brief-4.pdf
+
+  - title: Writing Demo Test 5
+    description: Writing tasks on food systems and climate adaptation.
+    time_limit: 3600
+    is_active: true
+    parts:
+      - order: 1
+        task: The diagram illustrates food supply stages from farms to urban stores. Summarize the process.
+        image_url: https://cdn.demo.ielts.uz/writing/task1-process-5.png
+        file_urls:
+          - https://cdn.demo.ielts.uz/writing/task1-prompt-5.pdf
+      - order: 2
+        task: Should individuals change their lifestyle to address climate change, or is government action more important? Discuss and give your opinion.
+        image_url: null
+        file_urls:
+          - https://cdn.demo.ielts.uz/writing/task2-brief-5.pdf
+
+  - title: Writing Demo Test 6
+    description: Writing tasks on digital services and social policy.
+    time_limit: 3600
+    is_active: true
+    parts:
+      - order: 1
+        task: The bar chart compares digital service usage by age group. Summarize key comparisons.
+        image_url: https://cdn.demo.ielts.uz/writing/task1-bars-6.png
+        file_urls:
+          - https://cdn.demo.ielts.uz/writing/task1-prompt-6.pdf
+      - order: 2
+        task: Some people think social media does more harm than good for young people. To what extent do you agree or disagree?
+        image_url: null
+        file_urls:
+          - https://cdn.demo.ielts.uz/writing/task2-brief-6.pdf
