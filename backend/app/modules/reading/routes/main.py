@@ -11,11 +11,11 @@ router = APIRouter(prefix="/reading", tags=["reading"])
 
 @router.get("/tests", response_model=CursorPage)
 async def list_tests(
-    cursor: str | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ) -> CursorPage:
-    return await services.list_reading_tests(db, cursor=cursor, limit=limit)
+    return await services.list_reading_tests(db, offset=offset, limit=limit)
 
 
 @router.get("/tests/{test_id}", response_model=ReadingTestDetail)

@@ -11,11 +11,11 @@ from app.db.models import ReadingPassage, ReadingQuestion, ReadingQuestionBlock,
 async def list_active_tests(
     db: AsyncSession,
     *,
-    cursor: str | None,
+    offset: int,
     limit: int,
-) -> tuple[list[ReadingTest], str | None]:
+) -> list[ReadingTest]:
     stmt = select(ReadingTest).where(ReadingTest.is_active.is_(True))
-    return await paginate_query(db, stmt, ReadingTest.id, limit, cursor)
+    return await paginate_query(db, stmt, ReadingTest.id, limit, offset)
 
 
 async def get_test_detail(db: AsyncSession, test_id: int) -> ReadingTest | None:

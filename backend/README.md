@@ -27,6 +27,23 @@ Run commands from project root (`../` from this directory).
    docker compose exec api python -m app.scripts.seed
    ```
 
+## Demo Fixtures (YAML)
+Demo fixtures are stored in `app/fixtures/demo/*.yaml` and loaded by `app.scripts.seed`.
+
+Included fixture files:
+- `users.yaml`
+- `profiles.yaml`
+- `progress.yaml`
+- `lessons.yaml`
+- `reading_tests.yaml`
+- `listening_tests.yaml`
+- `writing_tests.yaml`
+
+Default demo users (exactly 3):
+- `admin.demo@ielts.uz` / `AdminDemo123` (admin)
+- `teacher.demo@ielts.uz` / `TeacherDemo123` (teacher)
+- `student.demo@ielts.uz` / `StudentDemo123` (student)
+
 ## API
 - Base prefix: `/api/v1`
 - Swagger: `http://localhost:8000/docs`

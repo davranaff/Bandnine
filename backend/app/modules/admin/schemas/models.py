@@ -1,22 +1,26 @@
 from decimal import Decimal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
-class ReadingTestIn(BaseModel):
+class AdminBaseModel(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+
+class ReadingTestIn(AdminBaseModel):
     title: str
     description: str
     time_limit: int
     is_active: bool = True
 
 
-class ReadingPassageIn(BaseModel):
+class ReadingPassageIn(AdminBaseModel):
     title: str
     content: str
     passage_number: int
 
 
-class ReadingBlockIn(BaseModel):
+class ReadingBlockIn(AdminBaseModel):
     title: str
     description: str
     block_type: str
@@ -27,22 +31,22 @@ class ReadingBlockIn(BaseModel):
     flow_chart_completion: str | None = None
 
 
-class ReadingQuestionIn(BaseModel):
+class ReadingQuestionIn(AdminBaseModel):
     question_text: str
     order: int
 
 
-class QuestionOptionIn(BaseModel):
+class QuestionOptionIn(AdminBaseModel):
     option_text: str
     is_correct: bool = False
     order: int = 0
 
 
-class QuestionAnswerIn(BaseModel):
+class QuestionAnswerIn(AdminBaseModel):
     correct_answers: str
 
 
-class ListeningTestIn(BaseModel):
+class ListeningTestIn(AdminBaseModel):
     title: str
     description: str
     time_limit: int
@@ -50,12 +54,12 @@ class ListeningTestIn(BaseModel):
     voice_url: str | None = None
 
 
-class ListeningPartIn(BaseModel):
+class ListeningPartIn(AdminBaseModel):
     title: str
     order: int
 
 
-class ListeningBlockIn(BaseModel):
+class ListeningBlockIn(AdminBaseModel):
     title: str
     description: str
     block_type: str
@@ -63,37 +67,37 @@ class ListeningBlockIn(BaseModel):
     table_completion: str | None = None
 
 
-class ListeningQuestionIn(BaseModel):
+class ListeningQuestionIn(AdminBaseModel):
     question_text: str
     order: int
 
 
-class WritingTestIn(BaseModel):
+class WritingTestIn(AdminBaseModel):
     title: str
     description: str
     time_limit: int
     is_active: bool = True
 
 
-class WritingPartIn(BaseModel):
+class WritingPartIn(AdminBaseModel):
     order: int
     task: str
     image_url: str | None = None
     file_urls: list[str] | None = None
 
 
-class WritingReviewIn(BaseModel):
+class WritingReviewIn(AdminBaseModel):
     is_checked: bool = True
     corrections: str | None = None
     score: Decimal | None = None
 
 
-class CategoryIn(BaseModel):
+class CategoryIn(AdminBaseModel):
     title: str
     slug: str
 
 
-class LessonIn(BaseModel):
+class LessonIn(AdminBaseModel):
     category_id: int
     title: str
     video_link: str

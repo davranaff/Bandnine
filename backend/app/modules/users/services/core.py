@@ -59,20 +59,20 @@ async def change_password(
 async def list_users(
     db: AsyncSession,
     *,
-    cursor: str | None,
+    offset: int,
     limit: int,
     search: str | None,
 ) -> CursorPage:
-    items, next_cursor = await repository.list_active_users(
+    items = await repository.list_active_users(
         db,
-        cursor=cursor,
+        offset=offset,
         limit=limit,
         search=search,
     )
     return serialize_page(
         items,
         serializer=lambda user: user_public(user).model_dump(),
-        next_cursor=next_cursor,
         limit=limit,
+        offset=offset,
     )
 

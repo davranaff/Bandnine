@@ -1,9 +1,11 @@
-.PHONY: install lint test migrate upgrade seed run worker
+.PHONY: install lint test migrate upgrade seed seed-local run worker up down logs restart
 
 APP_DIR=backend
+PYTHON ?= python3
+PIP ?= $(PYTHON) -m pip
 
 install:
-	pip install -r $(APP_DIR)/requirements.txt
+	$(PIP) install -r $(APP_DIR)/requirements.txt
 
 lint:
 	cd $(APP_DIR) && ruff check .
@@ -18,10 +20,26 @@ upgrade:
 	cd $(APP_DIR) && alembic upgrade head
 
 seed:
-	cd $(APP_DIR) && python -m app.scripts.seed
+	docker compose up -d postgres redis api
+	docker compose exec -T api python -m app.scripts.seed
+
+seed-local:
+	cd $(APP_DIR) && $(PYTHON) -m app.scripts.seed
 
 run:
 	cd $(APP_DIR) && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 worker:
 	cd $(APP_DIR) && arq app.workers.arq_worker.WorkerSettings
+
+up:
+	docker compose up --build -d
+
+down:
+	docker compose down
+
+logs:
+	docker compose logs -f api frontend worker
+
+restart:
+	docker compose down && docker compose up --build

@@ -10,10 +10,10 @@ from app.db.models import Category, Lesson
 async def list_categories(
     db: AsyncSession,
     *,
-    cursor: str | None,
+    offset: int,
     limit: int,
-) -> tuple[list[Category], str | None]:
-    return await paginate_query(db, select(Category), Category.id, limit, cursor)
+) -> list[Category]:
+    return await paginate_query(db, select(Category), Category.id, limit, offset)
 
 
 async def get_category_by_slug(db: AsyncSession, slug: str) -> Category | None:
@@ -24,14 +24,14 @@ async def list_lessons_by_category(
     db: AsyncSession,
     *,
     category_id: int,
-    cursor: str | None,
+    offset: int,
     limit: int,
-) -> tuple[list[Lesson], str | None]:
+) -> list[Lesson]:
     return await paginate_query(
         db,
         select(Lesson).where(Lesson.category_id == category_id),
         Lesson.id,
         limit,
-        cursor,
+        offset,
     )
 

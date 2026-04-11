@@ -214,10 +214,10 @@ def serialize_reading_test_detail(test: ReadingTest) -> dict[str, Any]:
 
 async def list_reading_tests(
     db: AsyncSession,
-    cursor: str | None,
+    offset: int,
     limit: int,
 ) -> CursorPage:
-    rows, next_cursor = await repository.list_active_tests(db, cursor=cursor, limit=limit)
+    rows = await repository.list_active_tests(db, offset=offset, limit=limit)
     return serialize_page(
         rows,
         serializer=lambda row: ReadingTestListItem(
@@ -228,8 +228,8 @@ async def list_reading_tests(
             is_active=row.is_active,
             created_at=row.created_at,
         ).model_dump(),
-        next_cursor=next_cursor,
         limit=limit,
+        offset=offset,
     )
 
 

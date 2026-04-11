@@ -1,0 +1,225 @@
+tests:
+  - title: Listening Demo Test 1
+    description: Listening tasks on urban transport and tourism in Tashkent.
+    time_limit: 1800
+    is_active: true
+    voice_url: https://cdn.demo.ielts.uz/audio/listening-test-1.mp3
+    parts:
+      - title: Part 1 Daily Conversation
+        order: 1
+        blocks:
+          - title: Questions 1-3
+            description: Choose the correct option.
+            block_type: multiple_choice
+            order: 1
+            questions:
+              - order: 1
+                question_text: Which day did Alex schedule the meeting?
+                options:
+                  - option_text: Monday
+                    is_correct: false
+                  - option_text: Tuesday
+                    is_correct: true
+                  - option_text: Friday
+                    is_correct: false
+              - order: 2
+                question_text: How many tickets will they buy?
+                options:
+                  - option_text: Two
+                    is_correct: false
+                  - option_text: Three
+                    is_correct: true
+                  - option_text: Four
+                    is_correct: false
+              - order: 3
+                question_text: Where is the meeting point?
+                options:
+                  - option_text: Metro station
+                    is_correct: true
+                  - option_text: Library
+                    is_correct: false
+                  - option_text: Stadium
+                    is_correct: false
+
+      - title: Part 2 Announcement and Schedule
+        order: 2
+        blocks:
+          - title: Questions 4-5
+            description: Write ONE WORD ONLY.
+            block_type: table_completion
+            order: 1
+            table_completion: Session | Location | Topic
+            table_json:
+              header: [Session, Location, Topic]
+              rows:
+                - [Morning, Hall A, "____"]
+                - [Evening, Hall C, "____"]
+            questions:
+              - order: 1
+                question_text: Topic of the morning session
+                answers: [innovation]
+              - order: 2
+                question_text: Topic of the evening session
+                answers: [energy]
+
+      - title: Part 3 Academic Discussion
+        order: 3
+        blocks:
+          - title: Questions 6-8
+            description: Complete the summary below. NO MORE THAN TWO WORDS.
+            block_type: summary_completion
+            order: 1
+            questions:
+              - order: 1
+                question_text: The speaker first discussed the project ___ .
+                answers: [goals]
+              - order: 2
+                question_text: The main source of support was a ___ .
+                answers: [local grant]
+              - order: 3
+                question_text: In the end, they shared the experience with other ___ .
+                answers: [schools, regions]
+
+  - title: Listening Demo Test 2
+    description: Listening tasks about education and public health.
+    time_limit: 1800
+    is_active: true
+    voice_url: https://cdn.demo.ielts.uz/audio/listening-test-2.mp3
+    parts:
+      - title: Part 1 Phone Conversation
+        order: 1
+        blocks:
+          - title: Questions 1-3
+            description: Choose the correct letter A-C.
+            block_type: list_of_options
+            order: 1
+            questions:
+              - order: 1
+                question_text: What is the registration fee?
+                options:
+                  - option_text: A. 50,000 UZS
+                    is_correct: false
+                  - option_text: B. 80,000 UZS
+                    is_correct: true
+                  - option_text: C. 120,000 UZS
+                    is_correct: false
+              - order: 2
+                question_text: Which day does the course begin?
+                options:
+                  - option_text: A. Monday
+                    is_correct: true
+                  - option_text: B. Wednesday
+                    is_correct: false
+                  - option_text: C. Friday
+                    is_correct: false
+              - order: 3
+                question_text: In which building will classes be held?
+                options:
+                  - option_text: A. Building 1
+                    is_correct: false
+                  - option_text: B. Building 2
+                    is_correct: false
+                  - option_text: C. Building 3
+                    is_correct: true
+
+      - title: Part 2 Seminar Notes
+        order: 2
+        blocks:
+          - title: Questions 4-6
+            description: Complete the notes. Write ONE WORD ONLY.
+            block_type: note_completion
+            order: 1
+            questions:
+              - order: 1
+                question_text: Seminar duration
+                answers: [two]
+              - order: 2
+                question_text: Main method
+                answers: [observation]
+              - order: 3
+                question_text: Final assignment
+                answers: [report]
+
+      - title: Part 3 Short Lecture
+        order: 3
+        blocks:
+          - title: Question 7
+            description: Complete each sentence with NO MORE THAN TWO WORDS.
+            block_type: sentence_completion
+            order: 1
+            questions:
+              - order: 1
+                question_text: The strongest aspect of the research is ___ .
+                answers: [practical outcome]
+
+  - title: Listening Demo Test 3
+    description: Listening tasks on urban planning and environmental topics.
+    time_limit: 1800
+    is_active: true
+    voice_url: https://cdn.demo.ielts.uz/audio/listening-test-3.mp3
+    parts:
+      - title: Part 1 Directions and Map
+        order: 1
+        blocks:
+          - title: Questions 1-3
+            description: Choose the correct label.
+            block_type: map_plan_labelling
+            order: 1
+            questions:
+              - order: 1
+                question_text: Library label
+                options:
+                  - option_text: A
+                    is_correct: false
+                  - option_text: B
+                    is_correct: true
+                  - option_text: C
+                    is_correct: false
+              - order: 2
+                question_text: Laboratory label
+                options:
+                  - option_text: A
+                    is_correct: true
+                  - option_text: B
+                    is_correct: false
+                  - option_text: C
+                    is_correct: false
+              - order: 3
+                question_text: Recreation area label
+                options:
+                  - option_text: A
+                    is_correct: false
+                  - option_text: B
+                    is_correct: false
+                  - option_text: C
+                    is_correct: true
+
+      - title: Part 2 Community Meeting
+        order: 2
+        blocks:
+          - title: Questions 4-5
+            description: Complete each sentence with ONE WORD ONLY.
+            block_type: sentence_completion
+            order: 1
+            questions:
+              - order: 1
+                question_text: Main deadline for the new project
+                answers: [june]
+              - order: 2
+                question_text: Place where the report must be submitted
+                answers: [portal]
+
+      - title: Part 3 University Lecture
+        order: 3
+        blocks:
+          - title: Questions 6-7
+            description: Complete the summary. NO MORE THAN TWO WORDS.
+            block_type: summary_completion
+            order: 1
+            questions:
+              - order: 1
+                question_text: The professor emphasized the need for a ___ first.
+                answers: [clear plan]
+              - order: 2
+                question_text: Project effectiveness is often measured through ___ .
+                answers: [practical value]

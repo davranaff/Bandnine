@@ -19,12 +19,12 @@ router = APIRouter()
 @router.get("/exams/{kind}", response_model=CursorPage)
 async def admin_list_exams(
     kind: Literal["reading", "listening", "writing"],
-    cursor: str | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = admin_dependency(),
 ) -> CursorPage:
-    return await exam_services.list_exams(db, kind=kind, cursor=cursor, limit=limit)
+    return await exam_services.list_exams(db, kind=kind, offset=offset, limit=limit)
 
 
 @router.get("/exams/{kind}/{exam_id}")

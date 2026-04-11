@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any, Literal
@@ -22,20 +23,46 @@ from app.db.models import (
 )
 from app.modules.exams import repository
 from app.modules.exams.score import reading_band_score
+from app.modules.exams.services.validation import (
+    validate_listening_submit_payload,
+    validate_reading_submit_payload,
+    validate_writing_submit_payload,
+)
 from app.modules.listening.service import question_numbering as listening_question_numbering
 from app.modules.reading.service import question_numbering as reading_question_numbering
+from app.workers.queue import enqueue_writing_evaluation
+
+logger = logging.getLogger(__name__)
 
 ExamKind = Literal["reading", "listening", "writing"]
 
 
-def _calculate_time_spent_minutes(started_at: datetime | None, finished_at: datetime | None) -> float | None:
+def _calculate_elapsed_seconds(started_at: datetime | None, finished_at: datetime | None) -> int | None:
     if not started_at or not finished_at:
         return None
     if started_at.tzinfo is None and finished_at.tzinfo is not None:
         finished_at = finished_at.replace(tzinfo=None)
     elif started_at.tzinfo is not None and finished_at.tzinfo is None:
         started_at = started_at.replace(tzinfo=None)
-    return (finished_at - started_at).total_seconds() / 60
+
+    elapsed = int((finished_at - started_at).total_seconds())
+    return max(elapsed, 0)
+
+
+def _calculate_time_spent_seconds(
+    started_at: datetime | None,
+    finished_at: datetime | None,
+) -> int | None:
+    elapsed_seconds = _calculate_elapsed_seconds(started_at, finished_at)
+    if elapsed_seconds is None:
+        return None
+    return elapsed_seconds
+
+
+def _resolve_finish_reason(elapsed_seconds: int | None, limit_seconds: int) -> FinishReasonEnum:
+    if elapsed_seconds is not None and elapsed_seconds >= limit_seconds:
+        return FinishReasonEnum.time_is_up
+    return FinishReasonEnum.completed
 
 
 async def _get_reading_exam_owned(db: AsyncSession, exam_id: int, user_id: int) -> ReadingExam:
@@ -161,7 +188,7 @@ def _serialize_existing_reading_or_listening_result(
         "answers": answers_payload,
         "score": reading_band_score(correct_count),
         "correct_answers": correct_count,
-        "time_spent": _calculate_time_spent_minutes(exam.started_at, exam.finished_at),
+        "time_spent": _calculate_time_spent_seconds(exam.started_at, exam.finished_at),
     }
 
 
@@ -173,6 +200,7 @@ async def submit_reading_exam(
 ) -> dict[str, Any]:
     exam = await _get_reading_exam_owned(db, exam_id, user.id)
     numbering = reading_question_numbering(exam.reading_test)
+    time_limit_seconds = int(exam.reading_test.time_limit)
 
     if exam.finished_at is not None:
         return _serialize_existing_reading_or_listening_result("reading", exam, numbering)
@@ -184,14 +212,14 @@ async def submit_reading_exam(
         for question in block.questions
     }
 
+    normalized_answers = validate_reading_submit_payload(answers, question_index=question_index)
+
     output_rows: list[dict[str, Any]] = []
 
-    for item in answers:
+    for item in normalized_answers:
         question_id = int(item["id"])
         user_answer = str(item.get("value", ""))
-        question = question_index.get(question_id)
-        if question is None:
-            raise ApiError(code="invalid_question", message="Question does not belong to test", status_code=400)
+        question = question_index[question_id]
 
         valid_answers = _extract_correct_answers_for_question(question)
         correct_answer = " or ".join(valid_answers)
@@ -229,8 +257,13 @@ async def submit_reading_exam(
             }
         )
 
-    exam.finished_at = datetime.now(UTC)
-    exam.finish_reason = FinishReasonEnum.completed
+    finished_at = datetime.now(UTC)
+    if exam.started_at is None:
+        exam.started_at = finished_at
+
+    elapsed_seconds = _calculate_elapsed_seconds(exam.started_at, finished_at)
+    exam.finished_at = finished_at
+    exam.finish_reason = _resolve_finish_reason(elapsed_seconds, time_limit_seconds)
     await db.commit()
 
     correct_count = sum(1 for item in output_rows if item["is_correct"])
@@ -238,7 +271,7 @@ async def submit_reading_exam(
         "answers": output_rows,
         "score": reading_band_score(correct_count),
         "correct_answers": correct_count,
-        "time_spent": _calculate_time_spent_minutes(exam.started_at, exam.finished_at),
+        "time_spent": _calculate_time_spent_seconds(exam.started_at, exam.finished_at),
     }
 
 
@@ -250,6 +283,7 @@ async def submit_listening_exam(
 ) -> dict[str, Any]:
     exam = await _get_listening_exam_owned(db, exam_id, user.id)
     numbering = listening_question_numbering(exam.listening_test)
+    time_limit_seconds = int(exam.listening_test.time_limit)
 
     if exam.finished_at is not None:
         return _serialize_existing_reading_or_listening_result("listening", exam, numbering)
@@ -261,14 +295,14 @@ async def submit_listening_exam(
         for question in block.questions
     }
 
+    normalized_answers = validate_listening_submit_payload(answers, question_index=question_index)
+
     output_rows: list[dict[str, Any]] = []
 
-    for item in answers:
+    for item in normalized_answers:
         question_id = int(item["id"])
         user_answer = str(item.get("value", ""))
-        question = question_index.get(question_id)
-        if question is None:
-            raise ApiError(code="invalid_question", message="Question does not belong to test", status_code=400)
+        question = question_index[question_id]
 
         valid_answers = _extract_correct_answers_for_question(question)
         correct_answer = " or ".join(valid_answers)
@@ -306,8 +340,13 @@ async def submit_listening_exam(
             }
         )
 
-    exam.finished_at = datetime.now(UTC)
-    exam.finish_reason = FinishReasonEnum.completed
+    finished_at = datetime.now(UTC)
+    if exam.started_at is None:
+        exam.started_at = finished_at
+
+    elapsed_seconds = _calculate_elapsed_seconds(exam.started_at, finished_at)
+    exam.finished_at = finished_at
+    exam.finish_reason = _resolve_finish_reason(elapsed_seconds, time_limit_seconds)
     await db.commit()
 
     correct_count = sum(1 for item in output_rows if item["is_correct"])
@@ -315,7 +354,7 @@ async def submit_listening_exam(
         "answers": output_rows,
         "score": reading_band_score(correct_count),
         "correct_answers": correct_count,
-        "time_spent": _calculate_time_spent_minutes(exam.started_at, exam.finished_at),
+        "time_spent": _calculate_time_spent_seconds(exam.started_at, exam.finished_at),
     }
 
 
@@ -345,23 +384,23 @@ async def submit_writing_exam(
     parts_payload: list[dict[str, Any]],
 ) -> dict[str, Any]:
     exam = await _get_writing_exam_owned(db, exam_id, user.id)
+    time_limit_seconds = int(exam.writing_test.time_limit)
 
     if exam.finished_at is not None:
         return {
             "answers": _serialize_writing_parts(exam),
             "score": None,
             "correct_answers": None,
-            "time_spent": _calculate_time_spent_minutes(exam.started_at, exam.finished_at),
+            "time_spent": _calculate_time_spent_seconds(exam.started_at, exam.finished_at),
         }
 
     part_index = {part.id: part for part in exam.writing_test.writing_parts}
+    normalized_parts = validate_writing_submit_payload(parts_payload, part_ids=set(part_index.keys()))
 
-    for item in parts_payload:
+    exam_part_ids: list[int] = []
+    for item in normalized_parts:
         part_id = int(item["part_id"])
         essay = str(item.get("essay", ""))
-
-        if part_id not in part_index:
-            raise ApiError(code="invalid_part", message="Part does not belong to writing test", status_code=400)
 
         existing = await repository.get_writing_exam_part(
             db,
@@ -372,46 +411,67 @@ async def submit_writing_exam(
         if existing is None:
             existing = WritingExamPart(exam_id=exam.id, part_id=part_id, essay=essay)
             db.add(existing)
+            await db.flush()
         else:
             existing.essay = essay
 
-    exam.finished_at = datetime.now(UTC)
-    exam.finish_reason = FinishReasonEnum.completed
+        if not existing.is_checked:
+            existing.score = None
+            existing.corrections = "AI evaluation is pending. Please retry shortly to see detailed feedback."
+
+        exam_part_ids.append(existing.id)
+
+    finished_at = datetime.now(UTC)
+    if exam.started_at is None:
+        exam.started_at = finished_at
+
+    elapsed_seconds = _calculate_elapsed_seconds(exam.started_at, finished_at)
+    exam.finished_at = finished_at
+    exam.finish_reason = _resolve_finish_reason(elapsed_seconds, time_limit_seconds)
     await db.commit()
     await db.refresh(exam)
+
+    for exam_part_id in exam_part_ids:
+        try:
+            await enqueue_writing_evaluation(exam_part_id)
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "Failed to enqueue writing AI evaluation",
+                extra={"exam_id": exam.id, "exam_part_id": exam_part_id},
+            )
 
     return {
         "answers": _serialize_writing_parts(exam),
         "score": None,
         "correct_answers": None,
-        "time_spent": _calculate_time_spent_minutes(exam.started_at, exam.finished_at),
+        "time_spent": _calculate_time_spent_seconds(exam.started_at, exam.finished_at),
     }
 
 
 async def get_my_exams(
     db: AsyncSession,
     user: User,
-    reading_cursor: str | None,
-    listening_cursor: str | None,
-    writing_cursor: str | None,
+    reading_offset: int,
+    listening_offset: int,
+    writing_offset: int,
     limit: int,
 ) -> dict[str, Any]:
-    reading_rows, reading_next = await repository.list_user_reading_exams(
+    reading_rows = await repository.list_user_reading_exams(
         db,
         user_id=user.id,
-        cursor=reading_cursor,
+        offset=reading_offset,
         limit=limit,
     )
-    listening_rows, listening_next = await repository.list_user_listening_exams(
+    listening_rows = await repository.list_user_listening_exams(
         db,
         user_id=user.id,
-        cursor=listening_cursor,
+        offset=listening_offset,
         limit=limit,
     )
-    writing_rows, writing_next = await repository.list_user_writing_exams(
+    writing_rows = await repository.list_user_writing_exams(
         db,
         user_id=user.id,
-        cursor=writing_cursor,
+        offset=writing_offset,
         limit=limit,
     )
 
@@ -419,19 +479,19 @@ async def get_my_exams(
         "reading": serialize_page(
             reading_rows,
             serializer=lambda exam: _serialize_exam_summary("reading", exam),
-            next_cursor=reading_next,
             limit=limit,
+            offset=reading_offset,
         ).model_dump(),
         "listening": serialize_page(
             listening_rows,
             serializer=lambda exam: _serialize_exam_summary("listening", exam),
-            next_cursor=listening_next,
             limit=limit,
+            offset=listening_offset,
         ).model_dump(),
         "writing": serialize_page(
             writing_rows,
             serializer=lambda exam: _serialize_exam_summary("writing", exam),
-            next_cursor=writing_next,
             limit=limit,
+            offset=writing_offset,
         ).model_dump(),
     }

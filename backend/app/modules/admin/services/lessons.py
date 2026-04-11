@@ -15,15 +15,15 @@ from app.modules.admin.schemas import CategoryIn, LessonIn
 async def list_categories(
     db: AsyncSession,
     *,
-    cursor: str | None,
+    offset: int,
     limit: int,
 ) -> CursorPage:
-    rows, next_cursor = await paginate_query(db, select(Category), Category.id, limit, cursor)
+    rows = await paginate_query(db, select(Category), Category.id, limit, offset)
     return serialize_page(
         rows,
         serializer=lambda row: {"id": row.id, "title": row.title, "slug": row.slug},
-        next_cursor=next_cursor,
         limit=limit,
+        offset=offset,
     )
 
 
@@ -62,10 +62,10 @@ async def delete_category(db: AsyncSession, admin_user: User, *, category_id: in
 async def list_lessons(
     db: AsyncSession,
     *,
-    cursor: str | None,
+    offset: int,
     limit: int,
 ) -> CursorPage:
-    rows, next_cursor = await paginate_query(db, select(Lesson), Lesson.id, limit, cursor)
+    rows = await paginate_query(db, select(Lesson), Lesson.id, limit, offset)
     return serialize_page(
         rows,
         serializer=lambda row: {
@@ -74,8 +74,8 @@ async def list_lessons(
             "title": row.title,
             "video_link": row.video_link,
         },
-        next_cursor=next_cursor,
         limit=limit,
+        offset=offset,
     )
 
 

@@ -10,10 +10,10 @@ from app.db.models import User
 async def list_active_users(
     db: AsyncSession,
     *,
-    cursor: str | None,
+    offset: int,
     limit: int,
     search: str | None,
-) -> tuple[list[User], str | None]:
+) -> list[User]:
     stmt = select(User).where(User.is_active.is_(True))
     if search:
         q = f"%{search.lower()}%"
@@ -24,5 +24,5 @@ async def list_active_users(
                 func.lower(User.email).like(q),
             )
         )
-    return await paginate_query(db, stmt, User.id, limit, cursor)
+    return await paginate_query(db, stmt, User.id, limit, offset)
 

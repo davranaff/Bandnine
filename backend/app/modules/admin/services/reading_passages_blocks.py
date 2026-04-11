@@ -8,6 +8,7 @@ from app.core.audit import log_admin_action
 from app.db.models import ParseStatusEnum, ReadingPassage, ReadingQuestionBlock, ReadingTest, User
 from app.modules.admin import repository
 from app.modules.admin.schemas import ReadingBlockIn, ReadingPassageIn
+from app.modules.admin.services.validation import validate_reading_block_payload
 from app.workers.queue import enqueue_table_parse
 
 
@@ -58,6 +59,7 @@ async def create_reading_block(
     payload: ReadingBlockIn,
 ) -> dict[str, Any]:
     await repository.get_or_404(db, ReadingPassage, passage_id, "reading_passage_not_found", "Passage not found")
+    validate_reading_block_payload(payload)
     row = ReadingQuestionBlock(passage_id=passage_id, **payload.model_dump())
     if row.table_completion:
         row.parse_status = ParseStatusEnum.pending
@@ -78,6 +80,7 @@ async def patch_reading_block(
     payload: ReadingBlockIn,
 ) -> dict[str, Any]:
     row = await repository.get_or_404(db, ReadingQuestionBlock, block_id, "reading_block_not_found", "Block not found")
+    validate_reading_block_payload(payload)
     for key, value in payload.model_dump().items():
         setattr(row, key, value)
     if payload.table_completion is not None:

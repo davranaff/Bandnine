@@ -18,12 +18,12 @@ router = APIRouter()
 
 @router.get("/lessons/categories", response_model=CursorPage)
 async def admin_list_categories(
-    cursor: str | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = admin_dependency(),
 ) -> CursorPage:
-    return await lessons_services.list_categories(db, cursor=cursor, limit=limit)
+    return await lessons_services.list_categories(db, offset=offset, limit=limit)
 
 
 @router.post("/lessons/categories")
@@ -56,12 +56,12 @@ async def admin_delete_category(
 
 @router.get("/lessons", response_model=CursorPage)
 async def admin_list_lessons(
-    cursor: str | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = admin_dependency(),
 ) -> CursorPage:
-    return await lessons_services.list_lessons(db, cursor=cursor, limit=limit)
+    return await lessons_services.list_lessons(db, offset=offset, limit=limit)
 
 
 @router.post("/lessons")

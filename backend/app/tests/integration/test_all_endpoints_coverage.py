@@ -206,7 +206,7 @@ async def test_all_endpoints_are_covered(client, db_session):
         "/api/v1/admin/reading/tests",
         "/api/v1/admin/reading/tests",
         headers=admin_headers,
-        json={"title": "Admin Reading", "description": "Desc", "time_limit": 60, "is_active": True},
+        json={"title": "Admin Reading", "description": "Desc", "time_limit": 3600, "is_active": True},
     )
     reading_test_id = reading_test_resp.json()["id"]
     await hit(
@@ -220,7 +220,7 @@ async def test_all_endpoints_are_covered(client, db_session):
         "/api/v1/admin/reading/tests/{test_id}",
         f"/api/v1/admin/reading/tests/{reading_test_id}",
         headers=admin_headers,
-        json={"title": "Admin Reading Updated", "description": "Desc", "time_limit": 65, "is_active": True},
+        json={"title": "Admin Reading Updated", "description": "Desc", "time_limit": 3900, "is_active": True},
     )
     reading_passage_resp = await hit(
         "POST",
@@ -242,7 +242,7 @@ async def test_all_endpoints_are_covered(client, db_session):
         "/api/v1/admin/reading/passages/{passage_id}/blocks",
         f"/api/v1/admin/reading/passages/{reading_passage_id}/blocks",
         headers=admin_headers,
-        json={"title": "Block", "description": "Desc", "block_type": "short_answers", "order": 1},
+        json={"title": "Block", "description": "Desc", "block_type": "true_false_ng", "order": 1},
     )
     reading_block_id = reading_block_resp.json()["id"]
     await hit(
@@ -250,7 +250,7 @@ async def test_all_endpoints_are_covered(client, db_session):
         "/api/v1/admin/reading/blocks/{block_id}",
         f"/api/v1/admin/reading/blocks/{reading_block_id}",
         headers=admin_headers,
-        json={"title": "Block Upd", "description": "Desc 2", "block_type": "short_answers", "order": 1},
+        json={"title": "Block Upd", "description": "Desc 2", "block_type": "true_false_ng", "order": 1},
     )
     reading_question_resp = await hit(
         "POST",
@@ -282,10 +282,27 @@ async def test_all_endpoints_are_covered(client, db_session):
         headers=admin_headers,
         json={"option_text": "A1", "is_correct": True, "order": 1},
     )
+    reading_text_block_resp = await hit(
+        "POST",
+        "/api/v1/admin/reading/passages/{passage_id}/blocks",
+        f"/api/v1/admin/reading/passages/{reading_passage_id}/blocks",
+        headers=admin_headers,
+        json={"title": "Text Block", "description": "Desc", "block_type": "short_answers", "order": 2},
+    )
+    reading_text_block_id = reading_text_block_resp.json()["id"]
+    reading_text_question_resp = await hit(
+        "POST",
+        "/api/v1/admin/reading/blocks/{block_id}/questions",
+        f"/api/v1/admin/reading/blocks/{reading_text_block_id}/questions",
+        headers=admin_headers,
+        json={"question_text": "Text Question", "order": 1},
+    )
+    reading_text_question_id = reading_text_question_resp.json()["id"]
+
     reading_answer_resp = await hit(
         "POST",
         "/api/v1/admin/reading/questions/{question_id}/answers",
-        f"/api/v1/admin/reading/questions/{reading_question_id}/answers",
+        f"/api/v1/admin/reading/questions/{reading_text_question_id}/answers",
         headers=admin_headers,
         json={"correct_answers": "answer"},
     )
@@ -308,7 +325,7 @@ async def test_all_endpoints_are_covered(client, db_session):
         json={
             "title": "Admin Listening",
             "description": "Desc",
-            "time_limit": 40,
+            "time_limit": 2400,
             "is_active": True,
             "voice_url": "https://example.com/audio.mp3",
         },
@@ -322,7 +339,7 @@ async def test_all_endpoints_are_covered(client, db_session):
         json={
             "title": "Admin Listening Updated",
             "description": "Desc",
-            "time_limit": 45,
+            "time_limit": 2700,
             "is_active": True,
             "voice_url": "https://example.com/audio2.mp3",
         },
@@ -347,7 +364,7 @@ async def test_all_endpoints_are_covered(client, db_session):
         "/api/v1/admin/listening/parts/{part_id}/blocks",
         f"/api/v1/admin/listening/parts/{listening_part_id}/blocks",
         headers=admin_headers,
-        json={"title": "Block", "description": "Desc", "block_type": "short_answer", "order": 1},
+        json={"title": "Block", "description": "Desc", "block_type": "multiple_choice", "order": 1},
     )
     listening_block_id = listening_block_resp.json()["id"]
     await hit(
@@ -355,7 +372,7 @@ async def test_all_endpoints_are_covered(client, db_session):
         "/api/v1/admin/listening/blocks/{block_id}",
         f"/api/v1/admin/listening/blocks/{listening_block_id}",
         headers=admin_headers,
-        json={"title": "Block Upd", "description": "Desc2", "block_type": "short_answer", "order": 1},
+        json={"title": "Block Upd", "description": "Desc2", "block_type": "multiple_choice", "order": 1},
     )
     listening_question_resp = await hit(
         "POST",
@@ -387,10 +404,27 @@ async def test_all_endpoints_are_covered(client, db_session):
         headers=admin_headers,
         json={"option_text": "A1", "is_correct": True, "order": 1},
     )
+    listening_text_block_resp = await hit(
+        "POST",
+        "/api/v1/admin/listening/parts/{part_id}/blocks",
+        f"/api/v1/admin/listening/parts/{listening_part_id}/blocks",
+        headers=admin_headers,
+        json={"title": "Text Block", "description": "Desc", "block_type": "short_answer", "order": 2},
+    )
+    listening_text_block_id = listening_text_block_resp.json()["id"]
+    listening_text_question_resp = await hit(
+        "POST",
+        "/api/v1/admin/listening/blocks/{block_id}/questions",
+        f"/api/v1/admin/listening/blocks/{listening_text_block_id}/questions",
+        headers=admin_headers,
+        json={"question_text": "Text Question", "order": 1},
+    )
+    listening_text_question_id = listening_text_question_resp.json()["id"]
+
     listening_answer_resp = await hit(
         "POST",
         "/api/v1/admin/listening/questions/{question_id}/answers",
-        f"/api/v1/admin/listening/questions/{listening_question_id}/answers",
+        f"/api/v1/admin/listening/questions/{listening_text_question_id}/answers",
         headers=admin_headers,
         json={"correct_answers": "listen"},
     )
@@ -410,7 +444,7 @@ async def test_all_endpoints_are_covered(client, db_session):
         "/api/v1/admin/writing/tests",
         "/api/v1/admin/writing/tests",
         headers=admin_headers,
-        json={"title": "Admin Writing", "description": "Desc", "time_limit": 60, "is_active": True},
+        json={"title": "Admin Writing", "description": "Desc", "time_limit": 3600, "is_active": True},
     )
     writing_test_id = writing_test_resp.json()["id"]
     await hit(
@@ -418,7 +452,7 @@ async def test_all_endpoints_are_covered(client, db_session):
         "/api/v1/admin/writing/tests/{test_id}",
         f"/api/v1/admin/writing/tests/{writing_test_id}",
         headers=admin_headers,
-        json={"title": "Admin Writing Updated", "description": "Desc2", "time_limit": 65, "is_active": True},
+        json={"title": "Admin Writing Updated", "description": "Desc2", "time_limit": 3900, "is_active": True},
     )
     writing_part_resp = await hit(
         "POST",
@@ -499,7 +533,7 @@ async def test_all_endpoints_are_covered(client, db_session):
     )
 
     # Separate exam seed for stable exam flows (independent from admin CRUD delete chain)
-    read_exam_test = ReadingTest(title="Exam Reading", description="Desc", time_limit=60, total_questions=1, is_active=True)
+    read_exam_test = ReadingTest(title="Exam Reading", description="Desc", time_limit=3600, total_questions=1, is_active=True)
     db_session.add(read_exam_test)
     await db_session.flush()
     read_exam_passage = ReadingPassage(test_id=read_exam_test.id, title="P", content="C", passage_number=1)
@@ -522,7 +556,7 @@ async def test_all_endpoints_are_covered(client, db_session):
     listen_exam_test = ListeningTest(
         title="Exam Listening",
         description="Desc",
-        time_limit=30,
+        time_limit=1800,
         total_questions=1,
         is_active=True,
         voice_url="https://example.com/e.mp3",
@@ -546,7 +580,7 @@ async def test_all_endpoints_are_covered(client, db_session):
     await db_session.flush()
     db_session.add(ListeningQuestionAnswer(question_id=listen_exam_question.id, correct_answers="listen"))
 
-    write_exam_test = WritingTest(title="Exam Writing", description="Desc", time_limit=60, is_active=True)
+    write_exam_test = WritingTest(title="Exam Writing", description="Desc", time_limit=3600, is_active=True)
     db_session.add(write_exam_test)
     await db_session.flush()
     write_exam_part = WritingPart(test_id=write_exam_test.id, order=1, task="Write essay")

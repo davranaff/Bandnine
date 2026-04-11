@@ -8,6 +8,7 @@ from app.core.audit import log_admin_action
 from app.db.models import ListeningPart, ListeningQuestionBlock, ParseStatusEnum, User
 from app.modules.admin import repository
 from app.modules.admin.schemas import ListeningBlockIn
+from app.modules.admin.services.validation import validate_listening_block_payload
 from app.workers.queue import enqueue_table_parse
 
 
@@ -19,6 +20,7 @@ async def create_listening_block(
     payload: ListeningBlockIn,
 ) -> dict[str, Any]:
     await repository.get_or_404(db, ListeningPart, part_id, "listening_part_not_found", "Part not found")
+    validate_listening_block_payload(payload)
     row = ListeningQuestionBlock(part_id=part_id, **payload.model_dump())
     if row.table_completion:
         row.parse_status = ParseStatusEnum.pending
@@ -39,6 +41,7 @@ async def patch_listening_block(
     payload: ListeningBlockIn,
 ) -> dict[str, Any]:
     row = await repository.get_or_404(db, ListeningQuestionBlock, block_id, "listening_block_not_found", "Block not found")
+    validate_listening_block_payload(payload)
     for key, value in payload.model_dump().items():
         setattr(row, key, value)
     if payload.table_completion is not None:

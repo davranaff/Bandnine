@@ -1,14 +1,47 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from decimal import Decimal
+
 import pytest
 from arq import Retry
 
-from app.db.models import ParseStatusEnum, ReadingPassage, ReadingQuestionBlock, ReadingTest
+from app.core.security import hash_password
+from app.db.models import (
+    ParseStatusEnum,
+    ReadingPassage,
+    ReadingQuestionBlock,
+    ReadingTest,
+    RoleEnum,
+    User,
+    WritingExam,
+    WritingExamPart,
+    WritingPart,
+    WritingTest,
+)
 from app.db.session import SessionLocal
 from app.workers import tasks
 
 
+async def _create_user(db_session, email: str) -> User:
+    user = User(
+        email=email,
+        password_hash=hash_password("Password123"),
+        first_name="Worker",
+        last_name="Tester",
+        role=RoleEnum.student,
+        is_active=True,
+        verified_at=datetime.now(UTC),
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user
+
+
 @pytest.mark.asyncio
 async def test_table_parse_pending_to_done(db_session, monkeypatch):
-    test = ReadingTest(title="RT", description="D", time_limit=60, total_questions=0, is_active=True)
+    test = ReadingTest(title="RT", description="D", time_limit=3600, total_questions=0, is_active=True)
     db_session.add(test)
     await db_session.flush()
 
@@ -43,7 +76,7 @@ async def test_table_parse_pending_to_done(db_session, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_table_parse_failed_with_retries(db_session, monkeypatch):
-    test = ReadingTest(title="RT2", description="D", time_limit=60, total_questions=0, is_active=True)
+    test = ReadingTest(title="RT2", description="D", time_limit=3600, total_questions=0, is_active=True)
     db_session.add(test)
     await db_session.flush()
 
@@ -78,3 +111,88 @@ async def test_table_parse_failed_with_retries(db_session, monkeypatch):
         assert refreshed is not None
         assert refreshed.parse_status == ParseStatusEnum.failed
         assert "parse error" in (refreshed.parse_error or "")
+
+
+@pytest.mark.asyncio
+async def test_writing_ai_evaluation_pending_to_done(db_session, monkeypatch):
+    user = await _create_user(db_session, "worker-ai-done@example.com")
+
+    writing_test = WritingTest(title="WT", description="Desc", time_limit=3600, is_active=True)
+    db_session.add(writing_test)
+    await db_session.flush()
+
+    writing_part = WritingPart(test_id=writing_test.id, order=1, task="Discuss both views and give your opinion.")
+    db_session.add(writing_part)
+    await db_session.flush()
+
+    writing_exam = WritingExam(user_id=user.id, writing_test_id=writing_test.id)
+    db_session.add(writing_exam)
+    await db_session.flush()
+
+    exam_part = WritingExamPart(exam_id=writing_exam.id, part_id=writing_part.id, essay="This is my essay")
+    db_session.add(exam_part)
+    await db_session.commit()
+
+    async def fake_eval(task_prompt: str, essay: str) -> dict:
+        assert task_prompt
+        assert essay
+        return {
+            "overall_band": 6.5,
+            "summary": "Good response with clear structure.",
+            "criteria": {
+                "task_response": {"band": 6.5, "reason": "Addresses all parts of the question."},
+                "coherence_cohesion": {"band": 6.5, "reason": "Logical flow with minor linking issues."},
+                "lexical_resource": {"band": 6.0, "reason": "Adequate range with repetition."},
+                "grammar_accuracy": {"band": 6.5, "reason": "Mostly accurate grammar with minor errors."},
+            },
+            "strengths": ["Clear opinion", "Relevant examples"],
+            "improvements": ["Use wider vocabulary", "Improve sentence variety"],
+        }
+
+    monkeypatch.setattr(tasks, "_evaluate_writing_essay", fake_eval)
+    await tasks.evaluate_writing_exam_part({"job_try": 1}, exam_part.id)
+
+    async with SessionLocal() as verify_db:
+        refreshed = await verify_db.get(WritingExamPart, exam_part.id)
+        assert refreshed is not None
+        assert refreshed.score == Decimal("6.5")
+        assert refreshed.is_checked is False
+        assert "Estimated IELTS Writing band" in (refreshed.corrections or "")
+        assert "Criteria breakdown" in (refreshed.corrections or "")
+
+
+@pytest.mark.asyncio
+async def test_writing_ai_evaluation_failed_with_retries(db_session, monkeypatch):
+    user = await _create_user(db_session, "worker-ai-fail@example.com")
+
+    writing_test = WritingTest(title="WT2", description="Desc", time_limit=3600, is_active=True)
+    db_session.add(writing_test)
+    await db_session.flush()
+
+    writing_part = WritingPart(test_id=writing_test.id, order=1, task="Describe the chart.")
+    db_session.add(writing_part)
+    await db_session.flush()
+
+    writing_exam = WritingExam(user_id=user.id, writing_test_id=writing_test.id)
+    db_session.add(writing_exam)
+    await db_session.flush()
+
+    exam_part = WritingExamPart(exam_id=writing_exam.id, part_id=writing_part.id, essay="Essay content")
+    db_session.add(exam_part)
+    await db_session.commit()
+
+    async def fail_eval(task_prompt: str, essay: str) -> dict:
+        raise RuntimeError("evaluation error")
+
+    monkeypatch.setattr(tasks, "_evaluate_writing_essay", fail_eval)
+
+    with pytest.raises(Retry):
+        await tasks.evaluate_writing_exam_part({"job_try": 1}, exam_part.id)
+
+    await tasks.evaluate_writing_exam_part({"job_try": 3}, exam_part.id)
+
+    async with SessionLocal() as verify_db:
+        refreshed = await verify_db.get(WritingExamPart, exam_part.id)
+        assert refreshed is not None
+        assert refreshed.score is None
+        assert "failed after retries" in (refreshed.corrections or "")

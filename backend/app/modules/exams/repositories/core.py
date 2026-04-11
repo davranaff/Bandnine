@@ -134,15 +134,15 @@ async def list_user_reading_exams(
     db: AsyncSession,
     *,
     user_id: int,
-    cursor: str | None,
+    offset: int,
     limit: int,
-) -> tuple[list[ReadingExam], str | None]:
+) -> list[ReadingExam]:
     return await paginate_query(
         db,
         select(ReadingExam).where(ReadingExam.user_id == user_id),
         ReadingExam.id,
         limit,
-        cursor,
+        offset,
     )
 
 
@@ -150,15 +150,15 @@ async def list_user_listening_exams(
     db: AsyncSession,
     *,
     user_id: int,
-    cursor: str | None,
+    offset: int,
     limit: int,
-) -> tuple[list[ListeningExam], str | None]:
+) -> list[ListeningExam]:
     return await paginate_query(
         db,
         select(ListeningExam).where(ListeningExam.user_id == user_id),
         ListeningExam.id,
         limit,
-        cursor,
+        offset,
     )
 
 
@@ -166,14 +166,14 @@ async def list_user_writing_exams(
     db: AsyncSession,
     *,
     user_id: int,
-    cursor: str | None,
+    offset: int,
     limit: int,
-) -> tuple[list[WritingExam], str | None]:
+) -> list[WritingExam]:
     return await paginate_query(
         db,
         select(WritingExam).where(WritingExam.user_id == user_id),
         WritingExam.id,
         limit,
-        cursor,
+        offset,
     )
 

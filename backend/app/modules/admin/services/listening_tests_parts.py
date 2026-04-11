@@ -15,10 +15,10 @@ from app.modules.admin.schemas import ListeningPartIn, ListeningTestIn
 async def list_listening_tests(
     db: AsyncSession,
     *,
-    cursor: str | None,
+    offset: int,
     limit: int,
 ) -> CursorPage:
-    rows, next_cursor = await paginate_query(db, select(ListeningTest), ListeningTest.id, limit, cursor)
+    rows = await paginate_query(db, select(ListeningTest), ListeningTest.id, limit, offset)
     return serialize_page(
         rows,
         serializer=lambda row: {
@@ -29,8 +29,8 @@ async def list_listening_tests(
             "is_active": row.is_active,
             "voice_url": row.voice_url,
         },
-        next_cursor=next_cursor,
         limit=limit,
+        offset=offset,
     )
 
 

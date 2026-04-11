@@ -46,12 +46,12 @@ async def patch_profile(
 
 @router.get("/progress", response_model=CursorPage)
 async def list_progress(
-    cursor: str | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> CursorPage:
-    return await services.list_progress(db, current_user, cursor, limit)
+    return await services.list_progress(db, current_user, offset, limit)
 
 
 @router.post("/progress", response_model=ProgressOut)

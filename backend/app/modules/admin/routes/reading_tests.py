@@ -18,12 +18,12 @@ router = APIRouter()
 
 @router.get("/reading/tests", response_model=CursorPage)
 async def admin_list_reading_tests(
-    cursor: str | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     _: User = admin_dependency(),
 ) -> CursorPage:
-    return await reading_services.list_reading_tests(db, cursor=cursor, limit=limit)
+    return await reading_services.list_reading_tests(db, offset=offset, limit=limit)
 
 
 @router.post("/reading/tests")

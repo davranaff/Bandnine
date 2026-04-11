@@ -15,10 +15,10 @@ from app.modules.admin.schemas import WritingPartIn, WritingTestIn
 async def list_writing_tests(
     db: AsyncSession,
     *,
-    cursor: str | None,
+    offset: int,
     limit: int,
 ) -> CursorPage:
-    rows, next_cursor = await paginate_query(db, select(WritingTest), WritingTest.id, limit, cursor)
+    rows = await paginate_query(db, select(WritingTest), WritingTest.id, limit, offset)
     return serialize_page(
         rows,
         serializer=lambda row: {
@@ -28,8 +28,8 @@ async def list_writing_tests(
             "time_limit": row.time_limit,
             "is_active": row.is_active,
         },
-        next_cursor=next_cursor,
         limit=limit,
+        offset=offset,
     )
 
 

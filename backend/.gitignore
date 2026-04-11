@@ -6,7 +6,6 @@
 .pyre/
 .tox/
 .nox/
-test.db
 __pycache__/
 *.pyc
 *.pyo

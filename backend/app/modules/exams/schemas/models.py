@@ -24,7 +24,7 @@ class ExamSubmitOut(BaseModel):
     answers: list[dict[str, Any]]
     score: float | None
     correct_answers: int | None
-    time_spent: float | None
+    time_spent: int | None
 
 
 class ExamPublic(BaseModel):

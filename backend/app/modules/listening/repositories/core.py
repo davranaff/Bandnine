@@ -11,11 +11,11 @@ from app.db.models import ListeningPart, ListeningQuestion, ListeningQuestionBlo
 async def list_active_tests(
     db: AsyncSession,
     *,
-    cursor: str | None,
+    offset: int,
     limit: int,
-) -> tuple[list[ListeningTest], str | None]:
+) -> list[ListeningTest]:
     stmt = select(ListeningTest).where(ListeningTest.is_active.is_(True))
-    return await paginate_query(db, stmt, ListeningTest.id, limit, cursor)
+    return await paginate_query(db, stmt, ListeningTest.id, limit, offset)
 
 
 async def get_test_detail(db: AsyncSession, test_id: int) -> ListeningTest | None:

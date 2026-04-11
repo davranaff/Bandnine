@@ -1,0 +1,236 @@
+tests:
+  - title: Reading Demo Test 1
+    description: Mixed reading tasks focused on Samarkand and Bukhara.
+    time_limit: 3600
+    is_active: true
+    passages:
+      - title: Part 1 Ancient Libraries in Samarkand
+        passage_number: 1
+        content: Ancient libraries developed advanced methods for preserving, copying, and restoring manuscripts.
+        blocks:
+          - title: Questions 1-3
+            description: Choose True, False or Not Given.
+            block_type: true_false_ng
+            order: 1
+            questions:
+              - order: 1
+                question_text: The library stored only religious manuscripts.
+                options:
+                  - option_text: True
+                    is_correct: false
+                  - option_text: False
+                    is_correct: true
+                  - option_text: Not Given
+                    is_correct: false
+              - order: 2
+                question_text: Copying work was done in the evening.
+                options:
+                  - option_text: True
+                    is_correct: false
+                  - option_text: False
+                    is_correct: false
+                  - option_text: Not Given
+                    is_correct: true
+              - order: 3
+                question_text: The manuscripts were protected from humidity.
+                options:
+                  - option_text: True
+                    is_correct: true
+                  - option_text: False
+                    is_correct: false
+                  - option_text: Not Given
+                    is_correct: false
+
+          - title: Questions 4-5
+            description: Choose NO MORE THAN TWO WORDS from the passage.
+            block_type: table_completion
+            order: 2
+            table_completion: Period | Main Material | Storage Method
+            table_json:
+              header: [Period, Main Material, Storage Method]
+              rows:
+                - [14th century, paper, "____"]
+                - [15th century, parchment, "____"]
+            questions:
+              - order: 1
+                question_text: Storage method in the 14th century
+                answers: [clay box]
+              - order: 2
+                question_text: Storage method in the 15th century
+                answers: [wooden chest]
+
+      - title: Part 2 Craft Districts in Bukhara
+        passage_number: 2
+        content: In the craft district, workshops specialized in copperwork, jewelry making, and wood carving.
+        blocks:
+          - title: Questions 6-8
+            description: Complete the summary. Write NO MORE THAN TWO WORDS for each answer.
+            block_type: summary_completion
+            order: 1
+            questions:
+              - order: 1
+                question_text: Copper craftsmen used ___ as their main raw material.
+                answers: [copper ore, copper]
+              - order: 2
+                question_text: Young apprentices first learned to clean ___ .
+                answers: [tools]
+              - order: 3
+                question_text: Finished products were sold at the weekly ___ .
+                answers: [market, weekly market]
+
+  - title: Reading Demo Test 2
+    description: Reading tasks about nature conservation and education.
+    time_limit: 3600
+    is_active: true
+    passages:
+      - title: Part 1 Zarafshan Nature Reserve
+        passage_number: 1
+        content: The reserve regularly monitors rare birds and plant species across the protected area.
+        blocks:
+          - title: Questions 1-3
+            description: Choose the correct heading (A-C) for each paragraph.
+            block_type: matching_headings
+            order: 1
+            list_of_headings: |
+              A. Key Stages of the Monitoring System
+              B. Cooperation with the Local Community
+              C. Results of Bird Migration Tracking
+            questions:
+              - order: 1
+                question_text: Heading for paragraph 1
+                options:
+                  - option_text: A
+                    is_correct: true
+                  - option_text: B
+                    is_correct: false
+                  - option_text: C
+                    is_correct: false
+              - order: 2
+                question_text: Heading for paragraph 2
+                options:
+                  - option_text: A
+                    is_correct: false
+                  - option_text: B
+                    is_correct: true
+                  - option_text: C
+                    is_correct: false
+              - order: 3
+                question_text: Heading for paragraph 3
+                options:
+                  - option_text: A
+                    is_correct: false
+                  - option_text: B
+                    is_correct: false
+                  - option_text: C
+                    is_correct: true
+
+          - title: Questions 4-5
+            description: Complete the notes below. Write ONE WORD ONLY.
+            block_type: note_completion
+            order: 2
+            question_heading: Monitoring Process
+            questions:
+              - order: 1
+                question_text: Data type collected every week
+                answers: [temperature]
+              - order: 2
+                question_text: Indicator identified using drones
+                answers: [density]
+
+      - title: Part 2 Technology in Rural Schools
+        passage_number: 2
+        content: Internet quality, teacher training, and the number of devices strongly affect learning outcomes.
+        blocks:
+          - title: Questions 6-7
+            description: Complete each sentence with NO MORE THAN TWO WORDS.
+            block_type: sentence_completion
+            order: 1
+            questions:
+              - order: 1
+                question_text: Without stable internet, online classes become ___ .
+                answers: [ineffective, challenging]
+              - order: 2
+                question_text: The most useful approach for teachers is regular ___ .
+                answers: [training]
+
+  - title: Reading Demo Test 3
+    description: Reading tasks about industry and environmental programs.
+    time_limit: 3600
+    is_active: true
+    passages:
+      - title: Part 1 Andijan Silk Production Center
+        passage_number: 1
+        content: The silk center combines all stages from cocoon processing to final textile production.
+        blocks:
+          - title: Questions 1-3
+            description: Choose the correct option (A-C).
+            block_type: list_of_options
+            order: 1
+            questions:
+              - order: 1
+                question_text: Where does the cocoon drying stage take place?
+                options:
+                  - option_text: A. In the drying chamber
+                    is_correct: true
+                  - option_text: B. In the dyeing unit
+                    is_correct: false
+                  - option_text: C. In the quality control office
+                    is_correct: false
+              - order: 2
+                question_text: What mainly determines the quality of the final thread?
+                options:
+                  - option_text: A. Temperature alone
+                    is_correct: false
+                  - option_text: B. Even fiber tension
+                    is_correct: true
+                  - option_text: C. Dye alone
+                    is_correct: false
+              - order: 3
+                question_text: Where are most products shipped?
+                options:
+                  - option_text: A. Domestic market only
+                    is_correct: false
+                  - option_text: B. Schools only
+                    is_correct: false
+                  - option_text: C. Domestic and export markets
+                    is_correct: true
+
+      - title: Part 2 Tashkent Urban Greening Program
+        passage_number: 2
+        content: The greening program combines tree planting, irrigation systems, and community oversight.
+        blocks:
+          - title: Questions 4-5
+            description: Choose the best title for each paragraph.
+            block_type: choose_title
+            order: 1
+            questions:
+              - order: 1
+                question_text: Best title for paragraph 1
+                options:
+                  - option_text: A. Initial Planning Stage
+                    is_correct: true
+                  - option_text: B. Technical Failures
+                    is_correct: false
+                  - option_text: C. Growth in Export Markets
+                    is_correct: false
+              - order: 2
+                question_text: Best title for paragraph 2
+                options:
+                  - option_text: A. Local Entrepreneurship
+                    is_correct: false
+                  - option_text: B. Irrigation Infrastructure
+                    is_correct: true
+                  - option_text: C. Tourism Statistics
+                    is_correct: false
+
+          - title: Questions 6-7
+            description: Answer the questions below. Write NO MORE THAN TWO WORDS.
+            block_type: short_answers
+            order: 2
+            questions:
+              - order: 1
+                question_text: What is the key factor that improves tree survival?
+                answers: [regular irrigation, irrigation]
+              - order: 2
+                question_text: Which tool strengthened community oversight?
+                answers: [mobile app, app]

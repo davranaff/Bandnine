@@ -21,7 +21,7 @@ async def test_reading_listening_writing_detail_response_shapes(client, db_sessi
     reading_test = ReadingTest(
         title="Reading Detail",
         description="Desc",
-        time_limit=60,
+        time_limit=3600,
         total_questions=2,
         is_active=True,
     )
@@ -98,7 +98,7 @@ async def test_reading_listening_writing_detail_response_shapes(client, db_sessi
     listening_test = ListeningTest(
         title="Listening Detail",
         description="Desc",
-        time_limit=30,
+        time_limit=1800,
         total_questions=2,
         is_active=True,
         voice_url="https://example.com/audio.mp3",
@@ -165,7 +165,7 @@ async def test_reading_listening_writing_detail_response_shapes(client, db_sessi
     writing_test = WritingTest(
         title="Writing Detail",
         description="Desc",
-        time_limit=60,
+        time_limit=3600,
         is_active=True,
     )
     db_session.add(writing_test)
@@ -184,6 +184,7 @@ async def test_reading_listening_writing_detail_response_shapes(client, db_sessi
     reading_response = await client.get(f"/api/v1/reading/tests/{reading_test.id}")
     assert reading_response.status_code == 200
     reading_payload = reading_response.json()
+    assert reading_payload["time_limit"] == 3600
     assert reading_payload["parts"]
     assert reading_payload["passages"]
     assert reading_payload["parts"][0]["part_number"] == 1
@@ -203,6 +204,7 @@ async def test_reading_listening_writing_detail_response_shapes(client, db_sessi
     listening_response = await client.get(f"/api/v1/listening/tests/{listening_test.id}")
     assert listening_response.status_code == 200
     listening_payload = listening_response.json()
+    assert listening_payload["time_limit"] == 1800
     assert listening_payload["voice_url"] == "https://example.com/audio.mp3"
     assert listening_payload["audio_url"] == "https://example.com/audio.mp3"
     assert len(listening_payload["parts"]) == 2
@@ -221,6 +223,7 @@ async def test_reading_listening_writing_detail_response_shapes(client, db_sessi
     writing_response = await client.get(f"/api/v1/writing/tests/{writing_test.id}")
     assert writing_response.status_code == 200
     writing_payload = writing_response.json()
+    assert writing_payload["time_limit"] == 3600
     assert writing_payload["parts"]
     assert writing_payload["writing_parts"]
 

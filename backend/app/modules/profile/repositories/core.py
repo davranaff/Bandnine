@@ -35,11 +35,11 @@ async def list_progress_by_user_id(
     db: AsyncSession,
     *,
     user_id: int,
-    cursor: str | None,
+    offset: int,
     limit: int,
-) -> tuple[list[UserProgress], str | None]:
+) -> list[UserProgress]:
     stmt = select(UserProgress).where(UserProgress.user_id == user_id)
-    return await paginate_query(db, stmt, UserProgress.id, limit, cursor)
+    return await paginate_query(db, stmt, UserProgress.id, limit, offset)
 
 
 async def list_recent_progress(db: AsyncSession, *, user_id: int, limit: int) -> list[UserProgress]:

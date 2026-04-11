@@ -67,18 +67,18 @@ async def patch_profile(db: AsyncSession, user: User, payload: dict) -> ProfileO
     return _profile_out(profile)
 
 
-async def list_progress(db: AsyncSession, user: User, cursor: str | None, limit: int) -> CursorPage:
-    rows, next_cursor = await repository.list_progress_by_user_id(
+async def list_progress(db: AsyncSession, user: User, offset: int, limit: int) -> CursorPage:
+    rows = await repository.list_progress_by_user_id(
         db,
         user_id=user.id,
-        cursor=cursor,
+        offset=offset,
         limit=limit,
     )
     return serialize_page(
         rows,
         serializer=lambda row: _progress_out(row).model_dump(),
-        next_cursor=next_cursor,
         limit=limit,
+        offset=offset,
     )
 
 

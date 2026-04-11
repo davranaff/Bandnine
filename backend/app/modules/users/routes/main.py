@@ -47,7 +47,7 @@ async def change_password(
 
 @router.get("", response_model=CursorPage)
 async def list_users(
-    cursor: str | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
     search: str | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
@@ -55,7 +55,7 @@ async def list_users(
 ) -> CursorPage:
     return await services.list_users(
         db,
-        cursor=cursor,
+        offset=offset,
         limit=limit,
         search=search,
     )

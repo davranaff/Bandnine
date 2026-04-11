@@ -47,8 +47,8 @@ def serialize_writing_test_detail(test: WritingTest) -> dict[str, Any]:
     }
 
 
-async def list_writing_tests(db: AsyncSession, cursor: str | None, limit: int) -> CursorPage:
-    rows, next_cursor = await repository.list_active_tests(db, cursor=cursor, limit=limit)
+async def list_writing_tests(db: AsyncSession, offset: int, limit: int) -> CursorPage:
+    rows = await repository.list_active_tests(db, offset=offset, limit=limit)
     return serialize_page(
         rows,
         serializer=lambda row: WritingTestListItem(
@@ -59,8 +59,8 @@ async def list_writing_tests(db: AsyncSession, cursor: str | None, limit: int) -
             is_active=row.is_active,
             created_at=row.created_at,
         ).model_dump(),
-        next_cursor=next_cursor,
         limit=limit,
+        offset=offset,
     )
 
 

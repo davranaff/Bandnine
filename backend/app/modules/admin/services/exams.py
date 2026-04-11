@@ -25,16 +25,16 @@ async def list_exams(
     db: AsyncSession,
     *,
     kind: Literal["reading", "listening", "writing"],
-    cursor: str | None,
+    offset: int,
     limit: int,
 ) -> CursorPage:
     model = _resolve_exam_model(kind)
-    rows, next_cursor = await paginate_query(db, select(model), model.id, limit, cursor)
+    rows = await paginate_query(db, select(model), model.id, limit, offset)
     return serialize_page(
         rows,
         serializer=lambda row: _serialize_exam_summary(kind, row),
-        next_cursor=next_cursor,
         limit=limit,
+        offset=offset,
     )
 
 

@@ -1,0 +1,40 @@
+profiles:
+  - email: admin.demo@ielts.uz
+    date_of_birth: 1991-03-12
+    country: Uzbekistan
+    native_language: uz
+    target_band_score: 8.0
+
+  - email: teacher.demo@ielts.uz
+    date_of_birth: 1994-07-21
+    country: Uzbekistan
+    native_language: uz
+    target_band_score: 8.5
+
+  - email: student.demo@ielts.uz
+    date_of_birth: 2002-11-04
+    country: Uzbekistan
+    native_language: uz
+    target_band_score: 7.0
+
+analytics:
+  - email: admin.demo@ielts.uz
+    total_tests_taken: 12
+    average_band_score: 8.0
+    best_band_score: 8.5
+    total_study_time_seconds: 192000
+    last_test_date: "2026-03-20T10:00:00Z"
+
+  - email: teacher.demo@ielts.uz
+    total_tests_taken: 34
+    average_band_score: 8.2
+    best_band_score: 9.0
+    total_study_time_seconds: 451800
+    last_test_date: "2026-04-02T09:30:00Z"
+
+  - email: student.demo@ielts.uz
+    total_tests_taken: 8
+    average_band_score: 6.5
+    best_band_score: 7.0
+    total_study_time_seconds: 103200
+    last_test_date: "2026-04-05T15:45:00Z"
