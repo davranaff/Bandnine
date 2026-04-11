@@ -1,4 +1,3 @@
-import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { useCallback, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -16,168 +15,143 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { paths } from 'src/routes/paths';
 import { useSearchParams } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
-// config
-import { PATH_AFTER_LOGIN } from 'src/config-global';
 // auth
 import { useRegisterMutation } from 'src/auth/api';
+import { useLocales } from 'src/locales';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { getAuthFormErrorMessage } from 'src/utils/api-error-messages';
+import { createRegisterSchema } from './utils/auth-form-schemas';
+
 // ----------------------------------------------------------------------
 
 type FormValuesProps = {
-  tenantName: string;
   name: string;
   email: string;
+  targetBand: number;
   password: string;
   passwordConfirm: string;
 };
 
 export default function JwtRegisterView() {
+  const { tx } = useLocales();
   const registerMutation = useRegisterMutation();
-
   const [errorMsg, setErrorMsg] = useState('');
-
   const searchParams = useSearchParams();
-
   const returnTo = searchParams.get('returnTo');
-
   const password = useBoolean();
 
-  const RegisterSchema = Yup.object().shape({
-    tenantName: Yup.string().required('Organization name is required'),
-    name: Yup.string().required('Full name is required'),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required').min(8, 'Password must be at least 8 characters'),
-    passwordConfirm: Yup.string()
-      .required('Confirm password is required')
-      .oneOf([Yup.ref('password')], 'Passwords must match'),
-  });
-
-  const defaultValues = {
-    tenantName: '',
-    name: '',
-    email: '',
-    password: '',
-    passwordConfirm: '',
-  };
-
   const methods = useForm<FormValuesProps>({
-    resolver: yupResolver(RegisterSchema),
-    defaultValues,
+    resolver: yupResolver(createRegisterSchema(tx)),
+    defaultValues: {
+      name: '',
+      email: '',
+      targetBand: 7,
+      password: '',
+      passwordConfirm: '',
+    },
   });
 
-  const { handleSubmit, formState: { isSubmitting } } = methods;
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = methods;
 
   const onSubmit = useCallback(
     async (data: FormValuesProps) => {
       try {
         setErrorMsg('');
-        await registerMutation.mutateAsync({
-          tenantName: data.tenantName,
+        const payload = await registerMutation.mutateAsync({
+          tenantName: 'IELTS Mock Platform',
           name: data.name,
           email: data.email,
           password: data.password,
           passwordConfirm: data.passwordConfirm,
+          targetBand: Number(data.targetBand),
+          mockRole: 'student',
         });
-        window.location.href = returnTo || PATH_AFTER_LOGIN;
+        window.location.href = returnTo || paths.afterLogin(payload.user.role);
       } catch (error) {
-        console.error(error);
         setErrorMsg(getAuthFormErrorMessage(error, 'register'));
       }
     },
     [registerMutation, returnTo]
   );
 
-  const renderHead = (
-    <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
-      <Typography variant="h4">Get started absolutely free</Typography>
-
-      <Stack direction="row" spacing={0.5}>
-        <Typography variant="body2"> Already have an account? </Typography>
-
-        <Link href={paths.login} component={RouterLink} variant="subtitle2">
-          Sign in
-        </Link>
-      </Stack>
-    </Stack>
-  );
-
-  const renderTerms = (
-    <Typography
-      component="div"
-      sx={{ color: 'text.secondary', mt: 2.5, typography: 'caption', textAlign: 'center' }}
-    >
-      {'By signing up, I agree to '}
-      <Link underline="always" color="text.primary">
-        Terms of Service
-      </Link>
-      {' and '}
-      <Link underline="always" color="text.primary">
-        Privacy Policy
-      </Link>
-      .
-    </Typography>
-  );
-
-  const renderForm = (
-    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={2.5}>
-        {!!errorMsg && (
-          <Alert severity="error" onClose={() => setErrorMsg('')}>
-            {errorMsg}
-          </Alert>
-        )}
-
-        <RHFTextField name="tenantName" label="Organization / tenant name" />
-
-        <RHFTextField name="name" label="Your full name" />
-
-        <RHFTextField name="email" label="Email address" />
-
-        <RHFTextField
-          name="password"
-          label="Password"
-          type={password.value ? 'text' : 'password'}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={password.onToggle} edge="end">
-                  <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <RHFTextField
-          name="passwordConfirm"
-          label="Confirm password"
-          type={password.value ? 'text' : 'password'}
-        />
-
-        <LoadingButton
-          fullWidth
-          color="inherit"
-          size="large"
-          type="submit"
-          variant="contained"
-          loading={isSubmitting || registerMutation.isPending}
-        >
-          Create account
-        </LoadingButton>
-      </Stack>
-    </FormProvider>
-  );
-
   return (
     <>
-      {renderHead}
+      <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
+        <Typography variant="h4">{tx('auth.register.title')}</Typography>
 
-      {renderForm}
+        <Stack direction="row" spacing={0.5}>
+          <Typography variant="body2">{tx('auth.register.have_account')}</Typography>
 
-      {renderTerms}
+          <Link href={paths.login} component={RouterLink} variant="subtitle2">
+            {tx('auth.register.sign_in')}
+          </Link>
+        </Stack>
+      </Stack>
+
+      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+        <Stack spacing={2.5}>
+          {!!errorMsg && (
+            <Alert severity="error" onClose={() => setErrorMsg('')}>
+              {errorMsg}
+            </Alert>
+          )}
+
+          <RHFTextField name="name" label={tx('auth.shared.full_name')} />
+
+          <RHFTextField name="email" label={tx('auth.shared.email')} />
+
+          <RHFTextField
+            name="targetBand"
+            label={tx('auth.register.target_band')}
+            type="number"
+            inputProps={{ min: 4.5, max: 9, step: 0.5 }}
+          />
+
+          <RHFTextField
+            name="password"
+            label={tx('auth.shared.password')}
+            type={password.value ? 'text' : 'password'}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={password.onToggle} edge="end">
+                    <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <RHFTextField
+            name="passwordConfirm"
+            label={tx('auth.shared.confirm_password')}
+            type={password.value ? 'text' : 'password'}
+          />
+
+          <LoadingButton
+            fullWidth
+            color="inherit"
+            size="large"
+            type="submit"
+            variant="contained"
+            loading={isSubmitting || registerMutation.isPending}
+          >
+            {tx('auth.register.submit')}
+          </LoadingButton>
+        </Stack>
+      </FormProvider>
+
+      <Typography
+        component="div"
+        sx={{ color: 'text.secondary', mt: 2.5, typography: 'caption', textAlign: 'center' }}
+      >
+        {tx('auth.register.terms')}
+      </Typography>
     </>
   );
 }

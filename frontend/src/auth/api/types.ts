@@ -1,5 +1,5 @@
-/** Matches `auth_tenant.User.Role` after `humps.camelizeKeys`. */
-export type UserRole = 'admin' | 'manager' | 'seller';
+/** Active app roles used by the IELTS mock platform. */
+export type UserRole = 'student' | 'teacher';
 
 /** Matches DRF `UserSerializer` response (camelCase). */
 export type TenantUser = {
@@ -9,6 +9,7 @@ export type TenantUser = {
   role: UserRole;
   tenantId: string | null;
   createdAt: string;
+  targetBand?: number | null;
 };
 
 /** Login + register responses from Django JWT / register view. */
@@ -21,13 +22,16 @@ export type TokenPairResponse = {
 export type LoginRequest = {
   email: string;
   password: string;
+  mockRole?: UserRole;
 };
 
 /** Matches `RegisterSerializer` (camelCase request body). */
 export type RegisterRequest = {
-  tenantName: string;
+  tenantName?: string;
   name: string;
   email: string;
   password: string;
   passwordConfirm: string;
+  targetBand?: number;
+  mockRole?: UserRole;
 };

@@ -4,7 +4,11 @@ import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import { useMutate } from 'src/hooks/api';
 
 import { fetchLogin, fetchRegister } from './auth-requests';
-import { buildMockAuthUser, createMockAccessToken, isJwtAuthMock } from '../context/jwt/mock-auth';
+import {
+  createMockAuthResponseFromLogin,
+  createMockAuthResponseFromRegister,
+  isJwtAuthMock,
+} from '../context/jwt/mock-auth';
 import type { LoginRequest, RegisterRequest, TokenPairResponse } from './types';
 
 // ----------------------------------------------------------------------
@@ -16,9 +20,7 @@ export function useLoginMutation() {
   return useMutate<TokenPairResponse, LoginRequest>(
     async (data) => {
       if (isJwtAuthMock()) {
-        const access = createMockAccessToken();
-        const user = buildMockAuthUser(data.email);
-        return { access, refresh: '', user };
+        return createMockAuthResponseFromLogin(data);
       }
       return fetchLogin(data);
     },
@@ -39,10 +41,7 @@ export function useRegisterMutation() {
   return useMutate<TokenPairResponse, RegisterRequest>(
     async (data) => {
       if (isJwtAuthMock()) {
-        const access = createMockAccessToken();
-        const [first, ...rest] = data.name.split(' ');
-        const user = buildMockAuthUser(data.email, first, rest.join(' ') || undefined);
-        return { access, refresh: '', user };
+        return createMockAuthResponseFromRegister(data);
       }
       return fetchRegister(data);
     },
