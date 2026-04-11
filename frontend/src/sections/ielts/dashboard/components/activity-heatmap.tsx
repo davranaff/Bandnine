@@ -153,7 +153,13 @@ export function ActivityHeatmap({ lang, copy }: ActivityHeatmapProps) {
             </Stack>
 
             <Box sx={{ flex: 1, minWidth: 0, overflowX: 'auto', pb: 0.5 }}>
-              <Box sx={{ position: 'relative', height: 20, minWidth: HEATMAP_WEEK_COUNT * (CELL + GAP) }}>
+              <Box
+                sx={{
+                  position: 'relative',
+                  height: 20,
+                  minWidth: HEATMAP_WEEK_COUNT * (CELL + GAP),
+                }}
+              >
                 {monthLabels.map(({ col, label }) => (
                   <Typography
                     key={`${col}-${label}`}
@@ -172,7 +178,11 @@ export function ActivityHeatmap({ lang, copy }: ActivityHeatmapProps) {
                 ))}
               </Box>
 
-              <Stack direction="row" spacing={`${GAP}px`} sx={{ minWidth: HEATMAP_WEEK_COUNT * (CELL + GAP) }}>
+              <Stack
+                direction="row"
+                spacing={`${GAP}px`}
+                sx={{ minWidth: HEATMAP_WEEK_COUNT * (CELL + GAP) }}
+              >
                 {columns.map((col, wi) => (
                   <Stack key={wi} spacing={`${GAP}px`}>
                     {col.map((level, di) => {
@@ -180,9 +190,7 @@ export function ActivityHeatmap({ lang, copy }: ActivityHeatmapProps) {
                       const dateStr = format(d, 'd MMM yyyy', { locale });
                       const minutes = level > 0 ? 12 + level * 22 + ((wi + di) % 9) * 3 : 0;
                       const title =
-                        level === 0
-                          ? copy.cellEmpty(dateStr)
-                          : copy.cellActive(dateStr, minutes);
+                        level === 0 ? copy.cellEmpty(dateStr) : copy.cellActive(dateStr, minutes);
                       return (
                         <Tooltip key={di} title={title} enterTouchDelay={0}>
                           <Box
@@ -193,7 +201,10 @@ export function ActivityHeatmap({ lang, copy }: ActivityHeatmapProps) {
                               borderRadius: 0.5,
                               bgcolor: levelColor(level, theme),
                               border: (t) =>
-                                `1px solid ${alpha(t.palette.divider, t.palette.mode === 'dark' ? 0.35 : 0.6)}`,
+                                `1px solid ${alpha(
+                                  t.palette.divider,
+                                  t.palette.mode === 'dark' ? 0.35 : 0.6
+                                )}`,
                               display: 'block',
                               flexShrink: 0,
                               cursor: 'default',
@@ -245,7 +256,10 @@ export function ActivityHeatmap({ lang, copy }: ActivityHeatmapProps) {
                       borderRadius: 0.5,
                       bgcolor: levelColor(lv, theme),
                       border: (t) =>
-                        `1px solid ${alpha(t.palette.divider, t.palette.mode === 'dark' ? 0.35 : 0.6)}`,
+                        `1px solid ${alpha(
+                          t.palette.divider,
+                          t.palette.mode === 'dark' ? 0.35 : 0.6
+                        )}`,
                     }}
                   />
                 ))}

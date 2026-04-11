@@ -15,19 +15,13 @@ import { useRouter } from 'src/routes/hook';
 import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 // auth
 import { useLogoutMutation } from 'src/auth/api';
+import { getDefaultDashboardPath } from 'src/sections/ielts/shared/api/ielts-service';
 // components
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
-
-const OPTIONS = [
-  {
-    label: 'Dashboard',
-    linkTo: paths.dashboard,
-  },
-];
 
 // ----------------------------------------------------------------------
 
@@ -62,6 +56,12 @@ export default function AccountPopover() {
     user?.displayName?.trim()?.charAt(0)?.toUpperCase() ||
     user?.email?.trim()?.charAt(0)?.toUpperCase() ||
     '';
+  const options = [
+    {
+      label: 'Dashboard',
+      linkTo: getDefaultDashboardPath(user.role === 'teacher' ? 'teacher' : 'student'),
+    },
+  ];
 
   return (
     <>
@@ -108,7 +108,7 @@ export default function AccountPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Stack sx={{ p: 1 }}>
-          {OPTIONS.map((option) => (
+          {options.map((option) => (
             <MenuItem key={option.label} onClick={() => handleClickItem(option.linkTo)}>
               {option.label}
             </MenuItem>

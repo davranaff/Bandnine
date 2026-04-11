@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 // routes
-import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
+import { getDefaultDashboardPath } from 'src/sections/ielts/shared/api/ielts-service';
 //
 import { useAuthContext } from '../hooks';
 
@@ -14,13 +14,14 @@ type GuestGuardProps = {
 export default function GuestGuard({ children }: GuestGuardProps) {
   const router = useRouter();
 
-  const { authenticated } = useAuthContext();
+  const { authenticated, user } = useAuthContext();
 
   const check = useCallback(() => {
     if (authenticated) {
-      router.replace(paths.dashboard);
+      const currentRole = typeof user === 'object' && user && 'role' in user ? String(user.role) : 'student';
+      router.replace(getDefaultDashboardPath(currentRole === 'teacher' ? 'teacher' : 'student'));
     }
-  }, [authenticated, router]);
+  }, [authenticated, router, user]);
 
   useEffect(() => {
     check();

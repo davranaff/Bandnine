@@ -47,7 +47,7 @@ function emptyProfile(partial: Partial<AppUserProfile> = {}): AppUserProfile {
     city: '',
     zipCode: '',
     about: '',
-    role: 'admin',
+    role: 'student',
     isPublic: false,
     ...partial,
   };
@@ -74,7 +74,7 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
   }
   const email = typeof rec.email === 'string' ? rec.email : '';
   const id = typeof rec.id === 'string' ? rec.id : '';
-  const role = typeof rec.role === 'string' ? rec.role : 'admin';
+  const role = typeof rec.role === 'string' ? rec.role : 'student';
   const photoURL = typeof rec.photoURL === 'string' ? rec.photoURL : undefined;
 
   return emptyProfile({

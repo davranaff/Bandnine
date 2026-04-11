@@ -53,12 +53,12 @@ export default function NavVertical({ openNav, onCloseNav }: Props) {
     >
       <Logo sx={{ mt: 3, ml: 4, mb: 1 }} />
 
-      <NavSectionVertical
-        data={navData}
-        config={{
-          currentRole: user?.role || 'admin',
-        }}
-      />
+        <NavSectionVertical
+          data={navData}
+          config={{
+            currentRole: user?.role || 'student',
+          }}
+        />
 
       <Box sx={{ flexGrow: 1 }} />
 
