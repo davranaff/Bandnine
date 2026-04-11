@@ -21,16 +21,11 @@ services:
     working_dir: /app
     env_file:
       - ./.env
+      - ./frontend/.env
     environment:
       HOST: 0.0.0.0
-      PORT: 3000
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
-      REACT_APP_HOST_API: "${REACT_APP_HOST_API:-http://localhost:${API_PORT:-8000}}"
-      REACT_APP_ASSETS_API: "${REACT_APP_ASSETS_API:-}"
-      REACT_APP_MAPBOX_API: "${REACT_APP_MAPBOX_API:-}"
-      REACT_APP_DEFAULT_API_LANG: "${REACT_APP_DEFAULT_API_LANG:-uz}"
-      REACT_APP_AUTH_MOCK: "${REACT_APP_AUTH_MOCK:-false}"
     command: sh -c "if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm ci; fi && npm start"
     volumes:
       - ./frontend:/app
