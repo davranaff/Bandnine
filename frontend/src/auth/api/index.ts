@@ -1,7 +1,8 @@
 export { AUTH_URLS } from './urls';
-export { fetchLogin, fetchRegister, fetchCurrentUser } from './auth-requests';
+export { fetchLogin, fetchRegister, fetchConfirm, fetchCurrentUser } from './auth-requests';
 export { AUTH_USER_KEY, REFRESH_TOKEN_KEY } from './storage-keys';
 export type {
+  ConfirmRequest,
   LoginRequest,
   RegisterMutationResult,
   RegisterRequest,
@@ -11,4 +12,4 @@ export type {
   UserRole,
 } from './types';
 export { isTokenPairResponse } from './types';
-export { useLoginMutation, useLogoutMutation, useRegisterMutation } from './use-auth-api';
+export { useConfirmMutation, useLoginMutation, useLogoutMutation, useRegisterMutation } from './use-auth-api';

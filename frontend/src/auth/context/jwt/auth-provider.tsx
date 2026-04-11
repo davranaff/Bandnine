@@ -106,41 +106,48 @@ export function AuthProvider({ children }: Props) {
   const initialize = useCallback(async () => {
     try {
       const accessToken = sessionStorage.getItem(STORAGE_KEY);
+      const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY);
+      const hasValidAccessToken = Boolean(accessToken && isValidToken(accessToken));
+      const hasRefreshToken = Boolean(refreshToken);
 
-      if (accessToken && isValidToken(accessToken)) {
+      if (hasValidAccessToken) {
         setSession(accessToken);
+      }
 
-        if (isJwtAuthMock() && isJwtSignInMock()) {
-          dispatch({
-            type: Types.INITIAL,
-            payload: {
-              user: readStoredUser(),
-            },
-          });
-          return;
-        }
-
-        try {
-          const { user } = await fetchCurrentUser();
-          dispatch({
-            type: Types.INITIAL,
-            payload: {
-              user,
-            },
-          });
-        } catch {
-          dispatch({
-            type: Types.INITIAL,
-            payload: {
-              user: readStoredUser(),
-            },
-          });
-        }
-      } else {
+      if (!hasValidAccessToken && !hasRefreshToken) {
         dispatch({
           type: Types.INITIAL,
           payload: {
             user: null,
+          },
+        });
+        return;
+      }
+
+      if (isJwtAuthMock() && isJwtSignInMock()) {
+        dispatch({
+          type: Types.INITIAL,
+          payload: {
+            user: readStoredUser(),
+          },
+        });
+        return;
+      }
+
+      try {
+        const { user } = await fetchCurrentUser();
+        sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+        dispatch({
+          type: Types.INITIAL,
+          payload: {
+            user,
+          },
+        });
+      } catch {
+        dispatch({
+          type: Types.INITIAL,
+          payload: {
+            user: readStoredUser(),
           },
         });
       }
