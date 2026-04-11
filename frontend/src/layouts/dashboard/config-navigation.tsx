@@ -1,17 +1,17 @@
-import { useMemo } from 'react';
+import { useMemo } from 'react'
 // routes
-import { paths } from 'src/routes/paths';
+import { paths } from 'src/routes/paths'
 // locales
-import { useLocales } from 'src/locales';
+import { useLocales } from 'src/locales'
 // components
-import Iconify from 'src/components/iconify';
-import SvgColor from 'src/components/svg-color';
+import Iconify from 'src/components/iconify'
+import SvgColor from 'src/components/svg-color'
 
 // ----------------------------------------------------------------------
 
 const icon = (name: string) => (
   <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />
-);
+)
 
 const ICONS = {
   dashboard: icon('ic_dashboard'),
@@ -19,14 +19,18 @@ const ICONS = {
   listening: <Iconify icon="solar:headphones-round-bold-duotone" width={24} />,
   writing: <Iconify icon="solar:pen-bold-duotone" width={24} />,
   speaking: <Iconify icon="solar:microphone-3-bold-duotone" width={24} />,
-};
+  tests: <Iconify icon="solar:clipboard-list-bold-duotone" width={24} />,
+  profile: <Iconify icon="solar:user-circle-bold-duotone" width={24} />,
+  students: <Iconify icon="solar:users-group-rounded-bold-duotone" width={24} />,
+  analytics: <Iconify icon="solar:chart-2-bold-duotone" width={24} />,
+}
 
 // ----------------------------------------------------------------------
 
 export function useNavData() {
-  const { tx } = useLocales();
+  const { tx } = useLocales()
 
-  const data = useMemo(
+  return useMemo(
     () => [
       {
         subheader: tx('layout.nav.group'),
@@ -35,34 +39,67 @@ export function useNavData() {
             title: tx('layout.nav.dashboard'),
             path: paths.dashboard,
             icon: ICONS.dashboard,
+            roles: ['student'],
           },
           {
             title: tx('layout.nav.reading'),
             path: paths.ielts.reading,
             icon: ICONS.reading,
+            roles: ['student'],
           },
           {
             title: tx('layout.nav.listening'),
             path: paths.ielts.listening,
             icon: ICONS.listening,
+            roles: ['student'],
           },
           {
             title: tx('layout.nav.writing'),
             path: paths.ielts.writing,
             icon: ICONS.writing,
+            roles: ['student'],
+          },
+          {
+            title: tx('layout.nav.my_tests'),
+            path: paths.ielts.myTests,
+            icon: ICONS.tests,
+            roles: ['student'],
+          },
+          {
+            title: tx('layout.nav.profile'),
+            path: paths.ielts.profile,
+            icon: ICONS.profile,
+            roles: ['student'],
+          },
+          {
+            title: tx('layout.nav.teacher_dashboard'),
+            path: paths.ielts.teacher.root,
+            icon: ICONS.dashboard,
+            roles: ['teacher'],
+          },
+          {
+            title: tx('layout.nav.students'),
+            path: paths.ielts.teacher.students,
+            icon: ICONS.students,
+            roles: ['teacher'],
+          },
+          {
+            title: tx('layout.nav.analytics'),
+            path: paths.ielts.teacher.analytics,
+            icon: ICONS.analytics,
+            roles: ['teacher'],
           },
           {
             title: tx('layout.nav.speaking'),
             path: '#',
             icon: ICONS.speaking,
             disabled: true,
+            roles: ['student'],
             caption: tx('layout.nav.speaking_caption'),
           },
         ],
       },
     ],
     [tx]
-  );
-
-  return data;
+  )
 }

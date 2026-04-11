@@ -6,7 +6,11 @@ import type { LoginRequest, RegisterRequest, TokenPairResponse } from 'src/auth/
 
 import { AuthContext } from './auth-context';
 import { isValidToken, setSession } from './utils';
-import { buildMockAuthUser, createMockAccessToken, isJwtAuthMock } from './mock-auth';
+import {
+  createMockAuthResponseFromLogin,
+  createMockAuthResponseFromRegister,
+  isJwtAuthMock,
+} from './mock-auth';
 import { ActionMapType, AuthStateType, AuthUserType } from '../../types';
 
 // ----------------------------------------------------------------------
@@ -72,6 +76,15 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
 
 const STORAGE_KEY = 'accessToken';
 
+function readStoredUser() {
+  try {
+    const raw = sessionStorage.getItem(AUTH_USER_KEY);
+    return raw ? (JSON.parse(raw) as AuthUserType) : null;
+  } catch {
+    return null;
+  }
+}
+
 type Props = {
   children: React.ReactNode;
 };
@@ -97,12 +110,10 @@ export function AuthProvider({ children }: Props) {
         setSession(accessToken);
 
         if (isJwtAuthMock()) {
-          const raw = sessionStorage.getItem(AUTH_USER_KEY);
-          const user = raw ? JSON.parse(raw) : null;
           dispatch({
             type: Types.INITIAL,
             payload: {
-              user,
+              user: readStoredUser(),
             },
           });
           return;
@@ -117,12 +128,10 @@ export function AuthProvider({ children }: Props) {
             },
           });
         } catch {
-          const raw = sessionStorage.getItem(AUTH_USER_KEY);
-          const user = raw ? JSON.parse(raw) : null;
           dispatch({
             type: Types.INITIAL,
             payload: {
-              user,
+              user: readStoredUser(),
             },
           });
         }
@@ -134,8 +143,7 @@ export function AuthProvider({ children }: Props) {
           },
         });
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       dispatch({
         type: Types.INITIAL,
         payload: {
@@ -152,13 +160,7 @@ export function AuthProvider({ children }: Props) {
   const login = useCallback(
     async (credentials: LoginRequest) => {
       if (isJwtAuthMock()) {
-        const accessToken = createMockAccessToken();
-        const user = buildMockAuthUser(credentials.email);
-        syncSessionFromApiResponse({
-          access: accessToken,
-          refresh: '',
-          user,
-        });
+        syncSessionFromApiResponse(createMockAuthResponseFromLogin(credentials));
         return;
       }
 
@@ -171,14 +173,7 @@ export function AuthProvider({ children }: Props) {
   const register = useCallback(
     async (data: RegisterRequest) => {
       if (isJwtAuthMock()) {
-        const accessToken = createMockAccessToken();
-        const [first, ...rest] = data.name.split(' ');
-        const user = buildMockAuthUser(data.email, first, rest.join(' ') || undefined);
-        syncSessionFromApiResponse({
-          access: accessToken,
-          refresh: '',
-          user,
-        });
+        syncSessionFromApiResponse(createMockAuthResponseFromRegister(data));
         return;
       }
 
