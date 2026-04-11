@@ -6,23 +6,17 @@ import axios, {
 // eslint-disable-next-line import/no-extraneous-dependencies -- humps is a runtime dep; types are dev-only @types/humps
 import humps from 'humps';
 
-import { AUTH_USER_KEY, REFRESH_TOKEN_KEY } from 'src/auth/api/storage-keys';
+import { ACCESS_TOKEN_KEY } from 'src/auth/api/storage-keys';
+import { clearStoredAuthSession, getStoredRefreshToken, syncStoredAuthSession } from 'src/auth/api/session';
+import type { BackendAuthResponse } from 'src/auth/api/types';
+import { normalizeAuthResponse } from 'src/auth/api/utils';
 import { HOST_API } from 'src/config-global';
 import { API_ENDPOINTS } from 'src/lib/api/endpoints';
 
 // ----------------------------------------------------------------------
 
 const root = String(HOST_API ?? '').replace(/\/$/, '');
-const ACCESS_TOKEN_KEY = 'accessToken';
-
-type RefreshResponse = {
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
-  };
-};
-
-let refreshPromise: Promise<string | null> | null = null;
+let refreshRequest: Promise<string | null> | null = null;
 
 function asRequestTransformers(
   value: AxiosRequestTransformer | AxiosRequestTransformer[] | undefined
@@ -49,82 +43,56 @@ function decamelizeRequestBody(data: unknown): unknown {
   if (data == null || typeof data === 'string' || typeof data === 'number' || typeof data === 'boolean') {
     return data;
   }
-  if (Array.isArray(data)) {
-    return data;
-  }
-  if (typeof data === 'object') {
+  if (Array.isArray(data) || typeof data === 'object') {
     return humps.decamelizeKeys(data as Record<string, unknown>);
   }
   return data;
 }
 
 function camelizeResponseData(data: unknown): unknown {
-  if (data == null || typeof data !== 'object' || Array.isArray(data)) {
+  if (data == null || typeof data !== 'object') {
     return data;
   }
   return humps.camelizeKeys(data as Record<string, unknown>);
 }
 
-function clearStoredSession() {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
-  sessionStorage.removeItem(AUTH_USER_KEY);
+function hasWindowSession() {
+  return typeof window !== 'undefined' && typeof sessionStorage !== 'undefined';
 }
 
-async function refreshAccessToken(): Promise<string | null> {
-  if (typeof window === 'undefined') {
+async function refreshAccessToken() {
+  if (!hasWindowSession()) {
     return null;
   }
 
-  const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY);
+  const refreshToken = getStoredRefreshToken();
+
   if (!refreshToken) {
     return null;
   }
 
-  const response = await apiClient.request<RefreshResponse>({
-    method: 'POST',
-    url: API_ENDPOINTS.auth.refresh,
-    data: { refreshToken },
-    skipAuth: true,
-    skipRefresh: true,
-  });
-
-  const nextAccess = response.data.tokens.accessToken;
-  const nextRefresh = response.data.tokens.refreshToken;
-
-  if (!nextAccess || !nextRefresh) {
-    return null;
-  }
-
-  sessionStorage.setItem(ACCESS_TOKEN_KEY, nextAccess);
-  sessionStorage.setItem(REFRESH_TOKEN_KEY, nextRefresh);
-
-  return nextAccess;
-}
-
-async function getRefreshPromise() {
-  if (!refreshPromise) {
-    refreshPromise = refreshAccessToken()
-      .then((token) => {
-        if (!token) {
-          clearStoredSession();
-        }
-        return token;
+  if (!refreshRequest) {
+    refreshRequest = axios
+      .post(`${root}${API_ENDPOINTS.auth.refresh}`, {
+        refresh_token: refreshToken,
       })
-      .catch(() => {
-        clearStoredSession();
-        return null;
+      .then(({ data }) => {
+        const payload = normalizeAuthResponse(
+          humps.camelizeKeys(data as Record<string, unknown>) as BackendAuthResponse
+        );
+        syncStoredAuthSession(payload);
+        return payload.access;
+      })
+      .catch((error) => {
+        clearStoredAuthSession();
+        throw error;
       })
       .finally(() => {
-        refreshPromise = null;
+        refreshRequest = null;
       });
   }
 
-  return refreshPromise;
+  return refreshRequest;
 }
 
 /**
@@ -174,29 +142,38 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: unknown) => {
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-      const originalRequest = error.config;
-
-      if (
-        status === 401 &&
-        originalRequest &&
-        !originalRequest.skipAuth &&
-        !originalRequest.skipRefresh &&
-        !originalRequest._retry
-      ) {
-        originalRequest._retry = true;
-
-        const nextAccess = await getRefreshPromise();
-        if (nextAccess) {
-          originalRequest.headers = originalRequest.headers ?? {};
-          (originalRequest.headers as Record<string, string>).Authorization = `Bearer ${nextAccess}`;
-          return apiClient.request(originalRequest);
-        }
-      }
-
+    if (!axios.isAxiosError(error)) {
       return Promise.reject(error);
     }
-    return Promise.reject(error);
+
+    const responseStatus = error.response?.status;
+    const originalRequest = error.config;
+
+    if (
+      responseStatus !== 401 ||
+      !originalRequest ||
+      originalRequest.skipAuth ||
+      originalRequest.skipAuthRefresh ||
+      originalRequest.retryAfterRefresh
+    ) {
+      return Promise.reject(error);
+    }
+
+    try {
+      const nextAccessToken = await refreshAccessToken();
+
+      if (!nextAccessToken) {
+        throw error;
+      }
+
+      originalRequest.retryAfterRefresh = true;
+      originalRequest.headers = originalRequest.headers ?? {};
+      (originalRequest.headers as Record<string, string>).Authorization = `Bearer ${nextAccessToken}`;
+
+      return await apiClient.request(originalRequest);
+    } catch (refreshError) {
+      clearStoredAuthSession();
+      throw refreshError ?? error;
+    }
   }
 );

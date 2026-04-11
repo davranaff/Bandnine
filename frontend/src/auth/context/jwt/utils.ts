@@ -43,4 +43,6 @@ export const setSession = (accessToken: string | null) => {
     sessionStorage.removeItem(REFRESH_TOKEN_KEY);
     sessionStorage.removeItem(AUTH_USER_KEY);
   }
+
+  clearStoredAuthSession();
 };

@@ -8,11 +8,12 @@ declare module 'axios' {
      */
     skipAuth?: boolean;
     /**
-     * Disable automatic refresh-and-retry flow for this request.
-     * Use for `/auth/refresh` itself and requests that must fail fast on 401.
+     * Internal auth flag: don't trigger token refresh retry for this request.
      */
-    skipRefresh?: boolean;
-    /** Internal marker to prevent infinite retry loops after refresh. */
-    _retry?: boolean;
+    skipAuthRefresh?: boolean;
+    /**
+     * Internal auth flag: request was already retried once after refresh.
+     */
+    retryAfterRefresh?: boolean;
   }
 }

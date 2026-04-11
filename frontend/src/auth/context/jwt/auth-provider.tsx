@@ -1,11 +1,20 @@
 import { useEffect, useReducer, useCallback, useMemo } from 'react';
 
-import { fetchCurrentUser, fetchLogin, fetchRegister } from 'src/auth/api/auth-requests';
-import { AUTH_USER_KEY, REFRESH_TOKEN_KEY } from 'src/auth/api/storage-keys';
+import { fetchCurrentUser, fetchLogin, fetchRefresh, fetchRegister } from 'src/auth/api/auth-requests';
 import type { LoginRequest, RegisterRequest, TokenPairResponse } from 'src/auth/api/types';
+import {
+  clearStoredAuthSession,
+  getStoredAccessToken,
+  getStoredRefreshToken,
+  getStoredUser,
+  isValidToken,
+  redirectToLogin,
+  registerSessionExpiryHandler,
+  syncStoredAccessToken,
+  syncStoredAuthSession,
+} from 'src/auth/api/session';
 
 import { AuthContext } from './auth-context';
-import { isValidToken, setSession } from './utils';
 import {
   createMockAuthResponseFromLogin,
   createMockAuthResponseFromRegister,
@@ -75,17 +84,6 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
 
 // ----------------------------------------------------------------------
 
-const STORAGE_KEY = 'accessToken';
-
-function readStoredUser() {
-  try {
-    const raw = sessionStorage.getItem(AUTH_USER_KEY);
-    return raw ? (JSON.parse(raw) as AuthUserType) : null;
-  } catch {
-    return null;
-  }
-}
-
 type Props = {
   children: React.ReactNode;
 };
@@ -93,73 +91,145 @@ type Props = {
 export function AuthProvider({ children }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const syncSessionFromApiResponse = useCallback((payload: TokenPairResponse) => {
-    sessionStorage.setItem(REFRESH_TOKEN_KEY, payload.refresh);
-    sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(payload.user));
-    setSession(payload.access);
+  const applySessionPayload = useCallback((payload: TokenPairResponse, type: Types.INITIAL | Types.LOGIN) => {
+    syncStoredAuthSession(payload);
     dispatch({
-      type: Types.LOGIN,
+      type,
       payload: { user: payload.user },
     });
   }, []);
 
-  const initialize = useCallback(async () => {
-    try {
-      const accessToken = sessionStorage.getItem(STORAGE_KEY);
-      const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY);
-      const hasValidAccessToken = Boolean(accessToken && isValidToken(accessToken));
-      const hasRefreshToken = Boolean(refreshToken);
+  const syncSessionFromApiResponse = useCallback(
+    (payload: TokenPairResponse) => {
+      applySessionPayload(payload, Types.LOGIN);
+    },
+    [applySessionPayload]
+  );
 
-      if (hasValidAccessToken) {
-        setSession(accessToken);
-      }
+  const clearSession = useCallback(
+    (type: Types.INITIAL | Types.LOGOUT = Types.LOGOUT) => {
+      clearStoredAuthSession();
 
-      if (!hasValidAccessToken && !hasRefreshToken) {
+      if (type === Types.LOGOUT) {
         dispatch({
-          type: Types.INITIAL,
-          payload: {
-            user: null,
-          },
+          type: Types.LOGOUT,
         });
         return;
       }
 
-      if (isJwtAuthMock() && isJwtSignInMock()) {
-        dispatch({
-          type: Types.INITIAL,
-          payload: {
-            user: readStoredUser(),
-          },
-        });
-        return;
-      }
-
-      try {
-        const { user } = await fetchCurrentUser();
-        sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
-        dispatch({
-          type: Types.INITIAL,
-          payload: {
-            user,
-          },
-        });
-      } catch {
-        dispatch({
-          type: Types.INITIAL,
-          payload: {
-            user: readStoredUser(),
-          },
-        });
-      }
-    } catch {
       dispatch({
         type: Types.INITIAL,
         payload: {
           user: null,
         },
       });
+    },
+    []
+  );
+
+  const refreshSession = useCallback(
+    async (type: Types.INITIAL | Types.LOGIN = Types.LOGIN) => {
+      const refreshToken = getStoredRefreshToken();
+
+      if (!refreshToken || isJwtAuthMock()) {
+        return null;
+      }
+
+      const payload = await fetchRefresh(refreshToken);
+      applySessionPayload(payload, type);
+      return payload;
+    },
+    [applySessionPayload]
+  );
+
+  const initialize = useCallback(async () => {
+    try {
+      const accessToken = getStoredAccessToken();
+
+      if (accessToken && isValidToken(accessToken)) {
+        syncStoredAccessToken(accessToken);
+
+        if (isJwtAuthMock() && isJwtSignInMock()) {
+          dispatch({
+            type: Types.INITIAL,
+            payload: {
+              user: getStoredUser(),
+            },
+          });
+          return;
+        }
+
+        try {
+          const { user } = await fetchCurrentUser();
+          dispatch({
+            type: Types.INITIAL,
+            payload: {
+              user,
+            },
+          });
+        } catch {
+          if (getStoredRefreshToken() && !isJwtAuthMock()) {
+            try {
+              await refreshSession(Types.INITIAL);
+              return;
+            } catch {
+              // fall through to stored user fallback
+            }
+          }
+
+          dispatch({
+            type: Types.INITIAL,
+            payload: {
+              user: getStoredUser(),
+            },
+          });
+        }
+        return;
+      }
+
+      if (getStoredRefreshToken() && !isJwtAuthMock()) {
+        try {
+          await refreshSession(Types.INITIAL);
+        } catch {
+          clearSession(Types.INITIAL);
+        }
+      } else {
+        clearSession(Types.INITIAL);
+      }
+    } catch {
+      clearSession(Types.INITIAL);
     }
-  }, []);
+  }, [clearSession, refreshSession]);
+
+  const handleSessionExpiry = useCallback(async () => {
+    if (isJwtAuthMock()) {
+      clearSession();
+      redirectToLogin();
+      return;
+    }
+
+    try {
+      const payload = await refreshSession();
+
+      if (payload) {
+        return;
+      }
+
+      clearSession();
+      redirectToLogin();
+    } catch {
+      clearSession();
+      redirectToLogin();
+    }
+  }, [clearSession, refreshSession]);
+
+  useEffect(() => {
+    registerSessionExpiryHandler(handleSessionExpiry);
+
+    return () => {
+      registerSessionExpiryHandler(null);
+    };
+  }, [handleSessionExpiry]);
 
   useEffect(() => {
     initialize();
@@ -191,13 +261,8 @@ export function AuthProvider({ children }: Props) {
   );
 
   const logout = useCallback(async () => {
-    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
-    sessionStorage.removeItem(AUTH_USER_KEY);
-    setSession(null);
-    dispatch({
-      type: Types.LOGOUT,
-    });
-  }, []);
+    clearSession();
+  }, [clearSession]);
 
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
 
