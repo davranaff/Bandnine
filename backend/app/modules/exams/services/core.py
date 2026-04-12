@@ -1390,6 +1390,8 @@ async def mark_speaking_connection_disconnected(exam_id: int, db: AsyncSession) 
 
     exam.connection_state = "disconnected"
     await db.commit()
+
+
 async def start_overall_exam(
     db: AsyncSession,
     user: User,
