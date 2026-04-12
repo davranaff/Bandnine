@@ -887,7 +887,7 @@ function App() {
     ['localhost', '127.0.0.1'].includes(window.location.hostname)
   const defaultPlatformBase = isLocalhost
     ? 'http://localhost:3000'
-    : 'https://ilets.bandnine.online'
+    : 'https://ielts.bandnine.online'
   const configuredPlatformBase = import.meta.env.VITE_PLATFORM_URL?.trim()
   const platformBaseUrl =
     configuredPlatformBase && configuredPlatformBase.length > 0

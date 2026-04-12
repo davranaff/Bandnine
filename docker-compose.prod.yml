@@ -50,6 +50,8 @@ services:
     build:
       context: ./bandnine-landing
       dockerfile: Dockerfile.prod
+      args:
+        VITE_PLATFORM_URL: ${PROD_LANDING_PLATFORM_URL:-https://ielts.bandnine.online}
     restart: unless-stopped
     ports:
       - "${LANDING_PORT:-31000}:80"

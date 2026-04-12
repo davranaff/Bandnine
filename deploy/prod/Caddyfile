@@ -3,7 +3,7 @@ bandnine.online {
   reverse_proxy landing:80
 }
 
-ilets.bandnine.online {
+ielts.bandnine.online {
   encode gzip zstd
   reverse_proxy frontend:80
 }

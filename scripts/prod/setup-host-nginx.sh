@@ -7,7 +7,7 @@ COMPOSE_FILE="${COMPOSE_FILE:-$ROOT_DIR/docker-compose.prod.yml}"
 NGINX_CONF_PATH="${NGINX_CONF_PATH:-/etc/nginx/conf.d/bandnine.conf}"
 
 ROOT_DOMAIN="${ROOT_DOMAIN:-bandnine.online}"
-FRONT_DOMAIN="${FRONT_DOMAIN:-ilets.bandnine.online}"
+FRONT_DOMAIN="${FRONT_DOMAIN:-ielts.bandnine.online}"
 API_DOMAIN="${API_DOMAIN:-api.bandnine.online}"
 
 SYNC_ENV=1
@@ -24,7 +24,7 @@ Options:
   --nginx-conf <path>       Nginx conf path (default: /etc/nginx/conf.d/bandnine.conf)
 
   --root-domain <domain>    Landing domain (default: bandnine.online)
-  --front-domain <domain>   Frontend domain (default: ilets.bandnine.online)
+  --front-domain <domain>   Frontend domain (default: ielts.bandnine.online)
   --api-domain <domain>     API domain (default: api.bandnine.online)
 
   --no-env-sync             Do not rewrite .env.prod and rebuild docker services
@@ -182,6 +182,7 @@ if (( SYNC_ENV == 1 )); then
   upsert_env_key "$ENV_FILE" "PROD_FRONTEND_API_ORIGIN" "https://${API_DOMAIN}"
   upsert_env_key "$ENV_FILE" "FRONTEND_BASE_URL" "https://${FRONT_DOMAIN}"
   upsert_env_key "$ENV_FILE" "CORS_ALLOW_ORIGINS" "https://${FRONT_DOMAIN},https://${ROOT_DOMAIN}"
+  upsert_env_key "$ENV_FILE" "PROD_LANDING_PLATFORM_URL" "https://${FRONT_DOMAIN}"
 
   echo "[nginx-setup] Rebuilding app services with updated env..."
   compose config -q

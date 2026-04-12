@@ -2,7 +2,7 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-ARG VITE_PLATFORM_URL=https://ilets.bandnine.online
+ARG VITE_PLATFORM_URL=https://ielts.bandnine.online
 ENV VITE_PLATFORM_URL=${VITE_PLATFORM_URL}
 
 COPY package*.json ./
