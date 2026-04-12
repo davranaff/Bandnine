@@ -144,6 +144,7 @@ fi
 
 require_cmd nginx
 require_cmd docker
+require_cmd curl
 
 if (( WITH_CERTBOT == 1 )); then
   require_cmd certbot
@@ -217,6 +218,17 @@ server {
     listen [::]:80;
     server_name ${FRONT_DOMAIN};
 
+    location /api/ {
+        proxy_pass http://127.0.0.1:${API_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection \$bandnine_connection_upgrade;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
     location / {
         proxy_pass http://127.0.0.1:${FRONTEND_PORT};
         proxy_set_header Host \$host;
@@ -264,6 +276,22 @@ if (( WITH_CERTBOT == 1 )); then
     -d "$ROOT_DOMAIN" \
     -d "$FRONT_DOMAIN" \
     -d "$API_DOMAIN"
+fi
+
+echo "[nginx-setup] Verifying local backend health..."
+if curl -fsS "http://127.0.0.1:${API_PORT}/health" >/dev/null; then
+  echo "[nginx-setup] Local API is reachable on :${API_PORT}"
+else
+  echo "Error: API is not reachable on 127.0.0.1:${API_PORT}" >&2
+  exit 1
+fi
+
+echo "[nginx-setup] Verifying public API endpoint..."
+if curl -fsS "https://${API_DOMAIN}/health" >/dev/null; then
+  echo "[nginx-setup] Public API is reachable: https://${API_DOMAIN}/health"
+else
+  echo "[nginx-setup] Warning: https://${API_DOMAIN}/health is not reachable yet." >&2
+  echo "[nginx-setup] Check DNS/certificate/nginx server_name for ${API_DOMAIN}." >&2
 fi
 
 echo "[nginx-setup] Done."

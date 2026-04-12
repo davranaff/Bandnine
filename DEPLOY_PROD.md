@@ -10,8 +10,8 @@ Create these DNS records and point them to your server IP:
 ## 2) Open firewall ports
 Allow inbound ports:
 
-- `800/tcp` (HTTP container port published as host `800`)
-- `4430/tcp` (HTTPS container port published as host `4430`)
+- `80/tcp` (for host nginx + certbot challenge)
+- `443/tcp` (public HTTPS on domains)
 - Optional direct service ports from `.env.prod` (`18000`, `30000`, `31000`, etc.)
 
 ## 3) Prepare env
@@ -54,13 +54,17 @@ BRANCH=develop ./scripts/prod/update.sh
 ```
 
 ## 6) Domains routing
-Handled by Caddy (`deploy/prod/Caddyfile`) with SSL:
+Recommended: host nginx on `:443` with `scripts/prod/setup-host-nginx.sh`:
 
-- `https://bandnine.online:4430` -> landing
-- `https://ilets.bandnine.online:4430` -> frontend
-- `https://api.bandnine.online:4430` -> backend API
+- `https://bandnine.online` -> landing
+- `https://ilets.bandnine.online` -> frontend
+- `https://api.bandnine.online` -> backend API
 
-Important: since host HTTPS port is `4430`, URLs must include `:4430` (including frontend API origin and backend CORS origins in `.env.prod`).
+Run:
+
+```bash
+sudo ./scripts/prod/setup-host-nginx.sh --with-certbot --certbot-email you@example.com
+```
 
 ## Notes about ports
 Requested port style "add one zero" is kept where valid (for example `3000 -> 30000`).
