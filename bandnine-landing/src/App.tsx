@@ -470,6 +470,10 @@ function TiltFeatureCard({
   )
 }
 
+function joinUrl(base: string, path: string) {
+  return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`
+}
+
 function App() {
   const shouldReduceMotion = useReducedMotion()
   const [isScrolled, setIsScrolled] = useState(false)
@@ -878,6 +882,19 @@ function App() {
   const readiness = Math.round(((targetBand - 6) / 3) * 100)
   const readinessStroke = Math.round((Math.max(0, readiness) / 100) * 360)
   const pressureIndex = Math.max(3, 100 - confidence)
+  const isLocalhost =
+    typeof window !== 'undefined' &&
+    ['localhost', '127.0.0.1'].includes(window.location.hostname)
+  const defaultPlatformBase = isLocalhost
+    ? 'http://localhost:3000'
+    : 'https://ilets.bandnine.online'
+  const configuredPlatformBase = import.meta.env.VITE_PLATFORM_URL?.trim()
+  const platformBaseUrl =
+    configuredPlatformBase && configuredPlatformBase.length > 0
+      ? configuredPlatformBase
+      : defaultPlatformBase
+  const platformLoginUrl = joinUrl(platformBaseUrl, '/login')
+
   return (
     <div className="landing-root" id="product">
       <motion.div className="ambient-layer" style={{ backgroundImage: ambientLayer }} />
@@ -916,8 +933,7 @@ function App() {
         </nav>
         <a
           className="nav-cta"
-          href="#demo"
-          onClick={(event) => handleAnchorClick(event, '#demo')}
+          href={platformLoginUrl}
         >
           Start speaking
         </a>
@@ -1138,9 +1154,8 @@ function App() {
                   }}
                 >
                   <a
-                    href="#demo"
+                    href={platformLoginUrl}
                     className="btn btn-primary"
-                    onClick={(event) => handleAnchorClick(event, '#demo')}
                   >
                     Try demo
                   </a>
@@ -1651,8 +1666,7 @@ function App() {
 
               <a
                 className="btn btn-primary final-cta"
-                href="#demo"
-                onClick={(event) => handleAnchorClick(event, '#demo')}
+                href={platformLoginUrl}
               >
                 Start speaking under real pressure
               </a>
