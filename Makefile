@@ -1,5 +1,5 @@
 .PHONY: install lint test migrate upgrade seed seed-local run worker up down down-v logs restart \
-	prod-up prod-down prod-logs prod-migrate prod-deploy prod-update
+	prod-up prod-down prod-logs prod-migrate prod-deploy prod-update prod-nginx
 
 APP_DIR=backend
 PYTHON ?= python3
@@ -71,3 +71,7 @@ prod-deploy:
 
 prod-update:
 	./scripts/prod/update.sh
+
+prod-nginx:
+	@echo "Run on server with root privileges:"
+	@echo "  sudo ./scripts/prod/setup-host-nginx.sh --with-certbot --certbot-email you@example.com"
