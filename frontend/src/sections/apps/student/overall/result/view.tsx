@@ -18,6 +18,7 @@ import { useParams, useRouter } from 'src/routes/hook';
 import EmptyContent from 'src/components/empty-content';
 import { fDateTime } from 'src/utils/format-time';
 import { AppsPageHeader, MetricCard } from 'src/pages/components/apps';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 
 import { useOverallExamResultQuery } from '../api/use-overall-api';
 import type { BackendOverallModuleAttempt, OverallModule } from '../api/types';
@@ -27,13 +28,6 @@ function formatTimeSpent(value: number | null | undefined) {
     return '-';
   }
   return `${Math.round(value / 60)}m`;
-}
-
-function formatRoundedBand(value: number | null | undefined) {
-  if (value == null) {
-    return '-';
-  }
-  return String(Math.round(value));
 }
 
 function moduleResultPath(module: OverallModule, examId: number) {

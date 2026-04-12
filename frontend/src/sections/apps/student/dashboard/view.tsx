@@ -17,6 +17,7 @@ import { useLocales } from 'src/locales';
 import { RouterLink } from 'src/routes/components';
 import { fDate } from 'src/utils/format-time';
 import { getModuleAttemptPath } from 'src/sections/apps/common/module-test/utils/module-meta';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 
 import { ActivityHeatmap, DashboardHero, StatMiniCard } from './components';
 import type { DashboardModule, DashboardQuickLink } from './api/types';
@@ -76,7 +77,7 @@ function resolveBandChipLabel(
   translate: DashboardTranslate
 ) {
   if (score != null) {
-    return score.toFixed(1);
+    return formatRoundedBand(score);
   }
   if (status === 'in_progress') {
     return translate('pages.ielts.shared.status_in_progress');
@@ -180,7 +181,7 @@ export default function AppsDashboardView() {
         title={tx('layout.nav.dashboard')}
         description={tx('pages.ielts.dashboard.subtitle', {
           name: studentName,
-          band: statsQuery.data.estimatedOverallBand.toFixed(1),
+          band: formatRoundedBand(statsQuery.data.estimatedOverallBand),
         })}
       />
 
@@ -188,7 +189,7 @@ export default function AppsDashboardView() {
         <Grid item xs={6} sm={3}>
           <StatMiniCard
             label={tx('pages.ielts.dashboard.estimated_band')}
-            value={statsQuery.data.estimatedOverallBand.toFixed(1)}
+            value={formatRoundedBand(statsQuery.data.estimatedOverallBand)}
             icon="solar:medal-ribbon-star-bold-duotone"
             colorKey="primary"
           />

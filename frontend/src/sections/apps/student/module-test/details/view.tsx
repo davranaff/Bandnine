@@ -36,6 +36,7 @@ import {
   getModuleAttemptPath,
   getModuleSessionPath,
 } from 'src/sections/apps/common/module-test/utils/module-meta';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 
 import { AppsDetailSkeleton } from './skeleton';
 
@@ -281,7 +282,7 @@ export function ModuleTestDetailsView({ module, testId }: ModuleTestDetailsViewP
             <Grid item xs={6} md={12}>
               <MetricCard
                 label={tx('pages.ielts.shared.best_band')}
-                value={data.lastResult ? data.lastResult.estimatedBand.toFixed(1) : '-'}
+                value={formatRoundedBand(data.lastResult?.estimatedBand)}
                 icon="solar:medal-ribbon-star-bold-duotone"
                 color="primary"
               />

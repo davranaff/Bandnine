@@ -18,6 +18,7 @@ import EmptyContent from 'src/components/empty-content';
 import { fDateTime } from 'src/utils/format-time';
 import { useParams, useRouter } from 'src/routes/hook';
 import { AppsPageHeader, MetricCard } from 'src/pages/components/apps';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 import { AppsAttemptResultSkeleton } from 'src/sections/apps/common/module-test/result/skeleton';
 import { AttemptAiSummaryCard } from 'src/sections/apps/common/module-test/result/attempt-ai-summary-card';
 
@@ -224,7 +225,7 @@ export default function AppsReadingResultView() {
         <Grid item xs={6} md={3}>
           <MetricCard
             label={tx('pages.ielts.shared.estimated_band')}
-            value={result.score != null ? result.score.toFixed(1) : '-'}
+            value={formatRoundedBand(result.score)}
             icon="solar:medal-ribbon-star-bold-duotone"
             color="primary"
           />

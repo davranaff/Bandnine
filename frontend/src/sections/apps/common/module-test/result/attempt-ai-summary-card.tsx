@@ -14,6 +14,7 @@ import { useFetch } from 'src/hooks/api';
 import { useLocales } from 'src/locales';
 import Iconify from 'src/components/iconify';
 import { request } from 'src/utils/axios';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 
 type AiSummaryModule = 'reading' | 'listening' | 'writing';
 type AiSummarySource = 'manual' | 'auto_submit';
@@ -367,7 +368,7 @@ export function AttemptAiSummaryCard({ module, examId, sx }: AttemptAiSummaryCar
                 <Chip
                   size="small"
                   variant="outlined"
-                  label={`${tx('pages.ielts.shared.ai_summary_latest_score')}: ${latestScore.toFixed(1)}`}
+                  label={`${tx('pages.ielts.shared.ai_summary_latest_score')}: ${formatRoundedBand(latestScore)}`}
                 />
               ) : null}
               {delta != null ? (
@@ -606,14 +607,14 @@ export function AttemptAiSummaryCard({ module, examId, sx }: AttemptAiSummaryCar
                   size="small"
                   variant="outlined"
                   label={`${tx('pages.ielts.shared.ai_summary_latest_score')}: ${
-                    latestScore != null ? latestScore.toFixed(2) : '-'
+                    latestScore != null ? formatRoundedBand(latestScore) : '-'
                   }`}
                 />
                 <Chip
                   size="small"
                   variant="outlined"
                   label={`${tx('pages.ielts.shared.ai_summary_previous_score')}: ${
-                    previousScore != null ? previousScore.toFixed(2) : '-'
+                    previousScore != null ? formatRoundedBand(previousScore) : '-'
                   }`}
                 />
                 <Chip

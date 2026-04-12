@@ -18,6 +18,7 @@ import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 import { useParams, useRouter } from 'src/routes/hook';
 import { fDateTime } from 'src/utils/format-time';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 import {
   AppsDetailSkeleton,
 } from 'src/sections/apps/student/module-test/details/skeleton';
@@ -310,7 +311,7 @@ export default function AppsListeningDetailsView() {
                           <Stack direction="row" spacing={1} alignItems="center">
                             {typeof attempt.estimatedBand === 'number' ? (
                               <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700 }}>
-                                {attempt.estimatedBand.toFixed(1)}
+                                {formatRoundedBand(attempt.estimatedBand)}
                               </Typography>
                             ) : null}
                             <AppsStatusChip
@@ -370,7 +371,7 @@ export default function AppsListeningDetailsView() {
             <Grid item xs={6} md={12}>
               <MetricCard
                 label={tx('pages.ielts.shared.best_band')}
-                value={bestBand != null ? bestBand.toFixed(1) : '-'}
+                value={formatRoundedBand(bestBand)}
                 icon="solar:medal-ribbon-star-bold-duotone"
                 color="primary"
               />

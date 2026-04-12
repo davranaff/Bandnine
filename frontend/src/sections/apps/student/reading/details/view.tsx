@@ -17,6 +17,7 @@ import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 import { useParams, useRouter } from 'src/routes/hook';
 import { fDate, fDateTime } from 'src/utils/format-time';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 import {
   AppsPageHeader,
   AppsStatusChip,
@@ -272,7 +273,7 @@ export default function AppsReadingDetailsView() {
             <Grid item xs={6} md={12}>
               <MetricCard
                 label={tx('pages.ielts.shared.best_band')}
-                value={latestStoredResult?.score != null ? latestStoredResult.score.toFixed(1) : '-'}
+                value={formatRoundedBand(latestStoredResult?.score)}
                 helper={fDate(detail.createdAt)}
                 icon="solar:medal-ribbon-star-bold-duotone"
                 color="primary"

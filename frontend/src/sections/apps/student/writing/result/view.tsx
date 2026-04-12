@@ -18,6 +18,7 @@ import EmptyContent from 'src/components/empty-content';
 import { fDateTime } from 'src/utils/format-time';
 import { useParams, useRouter } from 'src/routes/hook';
 import { AppsPageHeader, MetricCard } from 'src/pages/components/apps';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 import { AppsAttemptResultSkeleton } from 'src/sections/apps/common/module-test/result/skeleton';
 import { AttemptAiSummaryCard } from 'src/sections/apps/common/module-test/result/attempt-ai-summary-card';
 
@@ -228,7 +229,7 @@ export default function AppsWritingResultView() {
         <Grid item xs={6} md={3}>
           <MetricCard
             label={tx('pages.ielts.shared.estimated_band')}
-            value={score != null ? score.toFixed(1) : '-'}
+            value={formatRoundedBand(score)}
             icon="solar:medal-ribbon-star-bold-duotone"
             color="primary"
           />
@@ -428,7 +429,7 @@ export default function AppsWritingResultView() {
                       <Chip
                         size="small"
                         variant="outlined"
-                        label={`${tx('pages.ielts.shared.estimated_band')}: ${answer.score.toFixed(1)}`}
+                        label={`${tx('pages.ielts.shared.estimated_band')}: ${formatRoundedBand(answer.score)}`}
                       />
                     ) : null}
                     <Chip

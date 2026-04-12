@@ -7,6 +7,7 @@ import { RouterLink } from 'src/routes/components';
 import type { TestListItem } from 'src/sections/apps/common/api/types';
 import { TestCatalogCard } from 'src/sections/apps/common/module-test/catalog/test-catalog-card';
 import type { ModuleAttemptHistoryItem } from 'src/sections/apps/common/module-test/utils/attempt-history';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 
 type ModuleTestCardProps = {
   item: TestListItem;
@@ -69,7 +70,7 @@ export function ModuleTestCard({
         </Stack>
       }
       summaryLine={`${item.durationMinutes} min · ${attemptsLabel}: ${item.attemptsCount}`}
-      primaryValue={item.bestBand ? item.bestBand.toFixed(1) : '-'}
+      primaryValue={formatRoundedBand(item.bestBand)}
       primaryValueHint={bestBandLabel}
       infoLines={[`${item.questionCount || item.taskCount} items`]}
       attemptHistoryLabel={attemptHistoryLabel}

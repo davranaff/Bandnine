@@ -17,6 +17,7 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
 import { AppsPageHeader, MetricCard } from 'src/pages/components/apps';
 import { fDateTime } from 'src/utils/format-time';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 
 import { useOverallExamListQuery, useOverallExamStartMutation } from './api/use-overall-api';
 import type { BackendOverallExamListItem } from './api/types';
@@ -55,13 +56,6 @@ function resolveFinishLabel(
     return tx('pages.ielts.shared.status_in_progress');
   }
   return resolveOverallStatusLabel(item, tx);
-}
-
-function formatRoundedBand(value: number | null | undefined) {
-  if (value == null) {
-    return '-';
-  }
-  return String(Math.round(value));
 }
 
 export default function AppsOverallExamView() {

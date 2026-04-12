@@ -19,6 +19,7 @@ import { useParams, useRouter } from 'src/routes/hook';
 import { fDate, fDateTime } from 'src/utils/format-time';
 import { AppsPageHeader, AppsStatusChip, InsightListCard, MetricCard } from 'src/pages/components/apps';
 import { toModuleAttemptHistoryItems } from 'src/sections/apps/common/module-test/utils/attempt-history';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 
 import {
   findLatestStoredWritingResultForTest,
@@ -267,7 +268,7 @@ export default function AppsWritingDetailsView() {
             <Grid item xs={6} md={12}>
               <MetricCard
                 label={tx('pages.ielts.shared.best_band')}
-                value={latestStoredResult?.score != null ? latestStoredResult.score.toFixed(1) : '-'}
+                value={formatRoundedBand(latestStoredResult?.score)}
                 helper={fDate(detail.createdAt)}
                 icon="solar:medal-ribbon-star-bold-duotone"
                 color="primary"

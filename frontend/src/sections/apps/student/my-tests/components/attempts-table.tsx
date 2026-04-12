@@ -16,6 +16,7 @@ import { RouterLink } from 'src/routes/components';
 import { useLocales } from 'src/locales';
 // utils
 import { fDate, fDateTime } from 'src/utils/format-time';
+import { formatRoundedBand } from 'src/sections/apps/common/utils/format-band';
 // table
 import { TableHeadCustom, TableNoData, TablePaginationCustom } from 'src/components/table';
 import { AppsStatusChip } from 'src/pages/components/apps';
@@ -135,7 +136,7 @@ export function AttemptsTable({
                 <TableCell>
                   {typeof item.estimatedBand === 'number' ? (
                     <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 700 }}>
-                      {item.estimatedBand.toFixed(1)}
+                      {formatRoundedBand(item.estimatedBand)}
                     </Typography>
                   ) : (
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
