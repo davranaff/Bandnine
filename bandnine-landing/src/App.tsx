@@ -28,6 +28,15 @@ type ExaminerTurn = {
   text: string
 }
 
+type PlatformView = 'dashboard' | 'writing' | 'speaking' | 'result'
+
+type PlatformSlide = {
+  view: PlatformView
+  kicker: string
+  title: string
+  description: string
+}
+
 const navItems = [
   { href: '#hero', label: 'Product' },
   { href: '#experience', label: 'Experience' },
@@ -135,8 +144,171 @@ const demoFlow: DemoMessage[] = [
   },
 ]
 
+const platformSlides: PlatformSlide[] = [
+  {
+    view: 'dashboard',
+    kicker: 'Platform view 01',
+    title: 'Command dashboard for band trajectory.',
+    description:
+      'Estimated band, consistency cadence, and study volume are visible in one performance board.',
+  },
+  {
+    view: 'writing',
+    kicker: 'Platform view 02',
+    title: 'Writing module with exam-grade structure.',
+    description:
+      'Every real-life task is packaged as a controlled attempt with duration, status, and instant action.',
+  },
+  {
+    view: 'speaking',
+    kicker: 'Platform view 03',
+    title: 'Live speaking chamber under pressure.',
+    description:
+      'Focus mode removes noise and keeps one signal alive: your voice against realistic examiner tempo.',
+  },
+  {
+    view: 'result',
+    kicker: 'Platform view 04',
+    title: 'Result intelligence, broken down by criteria.',
+    description:
+      'Fluency, lexical control, grammar, and pronunciation are isolated so improvement is exact, not vague.',
+  },
+]
+
+const dashboardHeatmapLevels = Array.from({ length: 96 }, (_, index) => {
+  const pulse = (index * 11 + 9) % 29
+  if (pulse < 3) return 3
+  if (pulse < 7) return 2
+  if (pulse < 11) return 1
+  return 0
+})
+
+const writingMockTests = [
+  'Writing Real-Life Test 01',
+  'Writing Real-Life Test 02',
+  'Writing Real-Life Test 03',
+  'Writing Real-Life Test 04',
+]
+
 const waveformBars = Array.from({ length: 26 }, (_, index) => index)
 const finalPulseBars = Array.from({ length: 24 }, (_, index) => index)
+
+function PlatformFrame({ view }: { view: PlatformView }) {
+  if (view === 'dashboard') {
+    return (
+      <div className="platform-ui dashboard-view">
+        <aside className="platform-mini-sidebar">
+          <strong>Band 9.0</strong>
+          <span className="is-active">Dashboard</span>
+          <span>Overall Exam</span>
+          <span>Writing</span>
+          <span>Speaking</span>
+        </aside>
+        <div className="platform-main">
+          <header>
+            <p>Dashboard</p>
+            <h4>Estimated band: 7.0</h4>
+          </header>
+          <div className="platform-metric-row">
+            <article>
+              <span>Band signal</span>
+              <strong>7.0</strong>
+            </article>
+            <article>
+              <span>Attempts</span>
+              <strong>18</strong>
+            </article>
+            <article>
+              <span>Weekly minutes</span>
+              <strong>146</strong>
+            </article>
+          </div>
+          <div className="platform-heatmap">
+            {dashboardHeatmapLevels.map((level, index) => (
+              <i key={`${level}-${index}`} className={`lvl-${level}`} />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (view === 'writing') {
+    return (
+      <div className="platform-ui writing-view">
+        <header>
+          <p>Writing</p>
+          <h4>Task 1 and Task 2 with mock rubric scoring.</h4>
+        </header>
+        <div className="writing-grid">
+          {writingMockTests.map((test) => (
+            <article key={test} className="writing-card">
+              <div>
+                <strong>{test}</strong>
+                <p>Academic writing tasks, 60 min, exam-style constraints.</p>
+              </div>
+              <span>Available</span>
+            </article>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (view === 'speaking') {
+    return (
+      <div className="platform-ui speaking-view">
+        <div className="speaking-orb">
+          <span />
+          <i />
+        </div>
+        <button type="button" className="speaking-mute">
+          Mute mic
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="platform-ui result-view">
+      <header>
+        <div>
+          <p>Attempt result</p>
+          <h4>Full Speaking Mock 01</h4>
+        </div>
+        <span>Completed</span>
+      </header>
+      <div className="result-cards">
+        <article>
+          <span>Estimated band</span>
+          <strong>6.0</strong>
+        </article>
+        <article>
+          <span>Time spent</span>
+          <strong>1m</strong>
+        </article>
+        <article>
+          <span>Questions</span>
+          <strong>1</strong>
+        </article>
+      </div>
+      <div className="result-breakdown">
+        <div>
+          <p>Fluency and coherence</p>
+          <em style={{ width: '66%' }} />
+        </div>
+        <div>
+          <p>Lexical resource</p>
+          <em style={{ width: '71%' }} />
+        </div>
+        <div>
+          <p>Grammar and accuracy</p>
+          <em style={{ width: '64%' }} />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function TiltFeatureCard({
   title,
@@ -207,6 +379,7 @@ function App() {
   const [bandScore, setBandScore] = useState(5.1)
   const [confidence, setConfidence] = useState(18)
   const [examinerStep, setExaminerStep] = useState(0)
+  const [platformStep, setPlatformStep] = useState(0)
   const [targetBand, setTargetBand] = useState(7.5)
   const [demoIndex, setDemoIndex] = useState(0)
   const [demoRunning, setDemoRunning] = useState(false)
@@ -214,6 +387,7 @@ function App() {
   const lenisRef = useRef<Lenis | null>(null)
   const pressureSectionRef = useRef<HTMLElement>(null)
   const examinerSectionRef = useRef<HTMLElement>(null)
+  const platformSectionRef = useRef<HTMLElement>(null)
 
   const pointerX = useMotionValue(50)
   const pointerY = useMotionValue(24)
@@ -318,6 +492,29 @@ function App() {
   const followupOpacity = useTransform(examinerProgressSmooth, [0.38, 0.68, 1], [0, 0.92, 1])
   const followupY = useTransform(examinerProgressSmooth, [0.38, 0.68, 1], [16, 0, -2])
 
+  const { scrollYProgress: platformProgress } = useScroll({
+    target: platformSectionRef,
+    offset: ['start start', 'end end'],
+  })
+
+  const platformProgressSmooth = useSpring(platformProgress, {
+    stiffness: shouldReduceMotion ? 220 : 62,
+    damping: shouldReduceMotion ? 48 : 24,
+    mass: 0.86,
+  })
+  const platformSignal = useTransform(
+    platformProgressSmooth,
+    [0, 0.24, 0.49, 0.74, 1],
+    [0, 1, 2, 3, 3],
+  )
+  const platformFill = useTransform(platformProgressSmooth, [0, 1], ['7%', '100%'])
+  const platformStageScale = useTransform(platformProgressSmooth, [0, 1], [0.95, 1.01])
+  const platformStageRotateX = useTransform(platformProgressSmooth, [0, 1], [3.5, -1.8])
+  const platformStageRotateY = useTransform(platformProgressSmooth, [0, 1], [-3.6, 2.2])
+  const platformStageY = useTransform(platformProgressSmooth, [0, 1], [28, -18])
+  const platformGlowX = useTransform(platformProgressSmooth, [0, 1], ['20%', '76%'])
+  const platformGlowY = useTransform(platformProgressSmooth, [0, 1], ['30%', '62%'])
+
   useMotionValueEvent(liveBand, 'change', (latest) => {
     const normalized = Number(latest.toFixed(1))
     setBandScore((previous) => (previous === normalized ? previous : normalized))
@@ -334,6 +531,11 @@ function App() {
       Math.min(examinerConversation.length - 1, Math.floor(latest)),
     )
     setExaminerStep((previous) => (previous === normalized ? previous : normalized))
+  })
+
+  useMotionValueEvent(platformSignal, 'change', (latest) => {
+    const normalized = Math.max(0, Math.min(platformSlides.length - 1, Math.floor(latest)))
+    setPlatformStep((previous) => (previous === normalized ? previous : normalized))
   })
 
   useEffect(() => {
@@ -973,9 +1175,100 @@ function App() {
           </div>
         </section>
 
+        <section className="story scene-platform" id="demo" ref={platformSectionRef}>
+          <div className="story-sticky">
+            <div className="scene-shell platform-shell">
+              <div className="scene-copy platform-copy">
+                <p className="scene-index">Scene 04</p>
+
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={platformSlides[platformStep].view}
+                    className="platform-copy-block"
+                    initial={
+                      shouldReduceMotion
+                        ? { opacity: 1, y: 0 }
+                        : { opacity: 0, y: 18, filter: 'blur(5px)' }
+                    }
+                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    exit={
+                      shouldReduceMotion
+                        ? { opacity: 0 }
+                        : { opacity: 0, y: -12, filter: 'blur(3px)' }
+                    }
+                    transition={{ duration: shouldReduceMotion ? 0.01 : 0.62, ease: 'easeOut' }}
+                  >
+                    <p className="platform-kicker">{platformSlides[platformStep].kicker}</p>
+                    <h2>{platformSlides[platformStep].title}</h2>
+                    <p>{platformSlides[platformStep].description}</p>
+                  </motion.div>
+                </AnimatePresence>
+
+                <div className="platform-steps">
+                  {platformSlides.map((slide, index) => (
+                    <div
+                      key={slide.view}
+                      className={`platform-step ${index === platformStep ? 'is-active' : ''}`}
+                    >
+                      <i />
+                      <span>{slide.view}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <motion.div
+                className="platform-stage"
+                style={{
+                  y: platformStageY,
+                  scale: platformStageScale,
+                  rotateX: platformStageRotateX,
+                  rotateY: platformStageRotateY,
+                }}
+              >
+                <motion.div
+                  className="platform-stage-glow"
+                  style={{ left: platformGlowX, top: platformGlowY }}
+                />
+                {platformSlides.map((slide, index) => {
+                  const isActive = platformStep === index
+
+                  return (
+                    <motion.article
+                      key={slide.view}
+                      className={`platform-screen ${isActive ? 'is-active' : ''}`}
+                      initial={false}
+                      animate={{
+                        opacity: isActive ? 1 : index < platformStep ? 0.22 : 0.3,
+                        y: isActive ? 0 : index < platformStep ? -108 : 108,
+                        x: isActive ? 0 : index < platformStep ? -24 : 24,
+                        scale: isActive ? 1 : index < platformStep ? 0.86 : 0.9,
+                        rotateX: isActive ? 0 : index < platformStep ? 7.5 : -7.5,
+                        rotateY: isActive ? 0 : index % 2 === 0 ? -5.2 : 5.2,
+                        filter: isActive ? 'blur(0px)' : 'blur(1.5px)',
+                      }}
+                      transition={{
+                        duration: shouldReduceMotion ? 0.01 : 0.7,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      style={{ zIndex: isActive ? 40 : platformSlides.length - index }}
+                    >
+                      <PlatformFrame view={slide.view} />
+                    </motion.article>
+                  )
+                })}
+
+                <div className="platform-progress-track" aria-hidden="true">
+                  <motion.span style={{ width: platformFill }} />
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
         <section className="scene scene-why" id="why-bandnine">
           <div className="section-headline">
-            <p className="scene-index">Scene 04</p>
+            <p className="scene-index">Scene 05</p>
             <h2>Why Bandnine feels different.</h2>
             <p>
               Built as a speaking performance system, not a content catalog. Every module is tuned for
@@ -995,9 +1288,9 @@ function App() {
           </div>
         </section>
 
-        <section className="scene scene-demo" id="demo">
+        <section className="scene scene-demo" id="lab">
           <div className="section-headline">
-            <p className="scene-index">Scene 05</p>
+            <p className="scene-index">Scene 06</p>
             <h2>Operate the performance model.</h2>
             <p>
               Move your target band, run a live response sequence, and watch Bandnine convert speaking
