@@ -3,7 +3,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-ExamKind = Literal["reading", "listening", "writing"]
+ExamKind = Literal["reading", "listening", "writing", "speaking"]
 ExamAttemptStatus = Literal["in_progress", "completed", "terminated"]
 ExamResultStatus = Literal["success", "failed", "in_progress"]
 SubmitFinishReasonOverride = Literal["left", "time_is_up"]
@@ -56,6 +56,7 @@ class ExamsMeOut(BaseModel):
     reading: dict[str, Any]
     listening: dict[str, Any]
     writing: dict[str, Any]
+    speaking: dict[str, Any]
 
 
 class StudentAttemptListItemOut(BaseModel):

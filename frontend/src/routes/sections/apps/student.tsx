@@ -20,6 +20,11 @@ const AppsWritingTestPage = lazy(() => import('src/pages/apps/student/writing-te
 const AppsWritingSessionPage = lazy(() => import('src/pages/apps/student/writing-session'));
 const AppsWritingResultPage = lazy(() => import('src/pages/apps/student/writing-result'));
 
+const AppsSpeakingPage = lazy(() => import('src/pages/apps/student/speaking'));
+const AppsSpeakingTestPage = lazy(() => import('src/pages/apps/student/speaking-test'));
+const AppsSpeakingSessionPage = lazy(() => import('src/pages/apps/student/speaking-session'));
+const AppsSpeakingResultPage = lazy(() => import('src/pages/apps/student/speaking-result'));
+
 const AppsOverallExamPage = lazy(() => import('src/pages/apps/student/overall-exam'));
 const AppsOverallExamSessionPage = lazy(
   () => import('src/pages/apps/student/overall-exam-session-page')
@@ -49,6 +54,10 @@ export const studentAppSessionRoutes: RouteObject[] = [
   {
     path: 'dashboard/writing/tests/:testId/session',
     element: studentSessionPage(<AppsWritingSessionPage />),
+  },
+  {
+    path: 'dashboard/speaking/tests/:testId/session',
+    element: studentOnly(<AppsSpeakingSessionPage />),
   },
   {
     path: 'dashboard/overall-exam/session/:overallId',
@@ -96,6 +105,18 @@ export const studentAppDashboardRoutes: RouteObject[] = [
   {
     path: 'writing/attempts/:attemptId',
     element: studentOnly(<AppsWritingResultPage />),
+  },
+  {
+    path: 'speaking',
+    element: studentOnly(<AppsSpeakingPage />),
+  },
+  {
+    path: 'speaking/tests/:testId',
+    element: studentOnly(<AppsSpeakingTestPage />),
+  },
+  {
+    path: 'speaking/attempts/:attemptId',
+    element: studentOnly(<AppsSpeakingResultPage />),
   },
   {
     path: 'overall-exam',

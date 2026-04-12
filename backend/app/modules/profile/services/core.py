@@ -391,6 +391,14 @@ async def get_quick_links(db: AsyncSession, user: User) -> DashboardQuickLinksOu
                 failed_attempts_count=writing_stats["failed_attempts_count"],
             ),
             DashboardQuickLinkOut(
+                label="Speaking",
+                path="/dashboard/speaking",
+                module=ProgressTestTypeEnum.speaking,
+                attempts_count=0,
+                successful_attempts_count=0,
+                failed_attempts_count=0,
+            ),
+            DashboardQuickLinkOut(
                 label="Profile",
                 path="/dashboard/profile",
                 module=None,
@@ -400,4 +408,3 @@ async def get_quick_links(db: AsyncSession, user: User) -> DashboardQuickLinksOu
             ),
         ]
     )
-
