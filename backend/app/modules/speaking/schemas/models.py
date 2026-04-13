@@ -6,6 +6,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from app.modules.assignments.schemas import GeneratedTestOriginOut
+
 
 class SpeakingPartId(str, Enum):
     part_1 = "part1"
@@ -107,6 +109,7 @@ class SpeakingTestListItem(BaseModel):
     attempts_count: int = Field(ge=0, default=0)
     successful_attempts_count: int = Field(ge=0, default=0)
     failed_attempts_count: int = Field(ge=0, default=0)
+    origin: GeneratedTestOriginOut | None = None
 
 
 class SpeakingTestDetail(BaseModel):
@@ -120,6 +123,7 @@ class SpeakingTestDetail(BaseModel):
     scoring_focus: list[str]
     created_at: datetime
     parts: list[SpeakingPartDetail]
+    origin: GeneratedTestOriginOut | None = None
 
 
 class SpeakingTranscriptSegment(BaseModel):
@@ -299,6 +303,10 @@ class SpeakingExaminerDecisionOut(BaseModel):
 class LiveClientEvent(BaseModel):
     type: str
     exam_id: int
+    client_id: str
+    seq: int = Field(ge=0)
+    nonce: str = Field(min_length=8, max_length=128)
+    sent_at: str | None = None
     payload: dict[str, Any] = Field(default_factory=dict)
 
 

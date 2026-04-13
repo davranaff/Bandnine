@@ -1,3 +1,5 @@
+import type { GeneratedTestOrigin } from 'src/sections/apps/common/module-test/generated-test-origin';
+
 export type WritingListRequestParams = {
   offset: number;
   limit: number;
@@ -25,6 +27,7 @@ export type BackendWritingListItem = {
   attemptsCount: number;
   successfulAttemptsCount: number;
   failedAttemptsCount: number;
+  origin: GeneratedTestOrigin | null;
 };
 
 export type WritingListItem = {
@@ -38,6 +41,7 @@ export type WritingListItem = {
   attemptsCount: number;
   successfulAttemptsCount: number;
   failedAttemptsCount: number;
+  origin: GeneratedTestOrigin | null;
 };
 
 export type WritingListPage = {
@@ -79,6 +83,7 @@ export type BackendWritingTestDetail = {
   createdAt: string;
   parts: BackendWritingPart[];
   writingParts: BackendWritingPart[];
+  origin: GeneratedTestOrigin | null;
 };
 
 export type WritingPromptAssets = {
@@ -111,6 +116,7 @@ export type WritingTestDetail = {
   createdAt: string;
   parts: WritingPart[];
   writingParts: WritingPart[];
+  origin: GeneratedTestOrigin | null;
 };
 
 export type BackendExamPublic = {
@@ -159,6 +165,12 @@ export type BackendWritingSubmitResult = {
   score: number | null;
   correctAnswers: number | null;
   timeSpent: number | null;
+};
+
+export type BackendExamDraftOut = {
+  savedItems: number;
+  startedAt: string | null;
+  updatedAt: string;
 };
 
 export type WritingDraftResponses = Record<string, string>;
